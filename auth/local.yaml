@@ -1,0 +1,14 @@
+env: dev
+
+grpc:
+  host: 0.0.0.0
+  port: 60000
+
+app:
+  access-token-ttl: 15m
+  refresh-token-ttl: 43200m
+
+redis:
+  address: "redis:6379"
+  password: "1234"
+  db: 1

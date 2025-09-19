@@ -1,0 +1,7 @@
+env: 'dev'
+grpc_clients:
+  auth_service_address: 'localhost:60000'
+http_server:
+  address: ':8082'
+  timeout: 10s
+  idle_timeout: 10s
