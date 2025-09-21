@@ -17,8 +17,8 @@ type AuthClient interface {
 	Logout(ctx context.Context, refresh_token string) error
 	//VerifyPhoneNumber(ctx context.Context, token, code string) (*Tokens, error)
 	RefreshToken(ctx context.Context, token string) (*Tokens, error)
-	//YandexLoginURL(ctx context.Context) (string, error)
-	//YandexAuthorize(ctx context.Context, state, code string) (*Tokens, error)
+	YandexLoginURL(ctx context.Context) (string, error)
+	YandexAuthorize(ctx context.Context, state, code string) (*Tokens, error)
 	GoogleLoginURL(ctx context.Context) (string, error)
 	GoogleAuthorize(ctx context.Context, state, code string) (*Tokens, error)
 }
@@ -226,15 +226,73 @@ func (c *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
-/*
 func (c *AuthHandler) YandexLoginURL(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
 
+		return
+	}
+
+	ctx := r.Context()
+	url, err := c.authClient.YandexLoginURL(ctx)
+	if err != nil {
+		log.Error("failed to get yandex url", zap.Error(err))
+
+		http.Error(w, "failed to get yandex url", http.StatusInternalServerError)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"Url": url,
+	})
+
+	render.Status(r, http.StatusOK)
 }
 
 func (c *AuthHandler) YandexAuthorize(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
 
+		return
+	}
+
+	state := r.URL.Query().Get("state")
+	code := r.URL.Query().Get("code")
+
+	ctx := r.Context()
+	resp, err := c.authClient.YandexAuthorize(ctx, state, code)
+	if err != nil {
+		log.Error("Failed to yandex authorize user", zap.Error(err))
+
+		http.Error(w, "authorization failed", http.StatusInternalServerError)
+
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    resp.AccessToken,
+		HttpOnly: true,
+		Domain:   "localhost",
+		Path:     "/",
+		Expires:  resp.Access_expire_at,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    resp.RefreshToken,
+		HttpOnly: true,
+		Domain:   "localhost",
+		Path:     "/",
+		Expires:  resp.Refresh_expire_at,
+	})
+
+	render.Status(r, http.StatusOK)
 }
-*/
+
 func (c *AuthHandler) GoogleLoginURL(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {

@@ -80,6 +80,32 @@ func (c *Client) RefreshToken(ctx context.Context, token string) (*handler.Token
 	}, nil
 }
 
+func (c *Client) YandexLoginURL(ctx context.Context) (string, error) {
+	resp, err := c.api.YandexLoginURL(ctx, &authv1.YandexLoginURLRequest{})
+	if err != nil {
+		return "", err
+	}
+
+	return resp.GetUrl(), nil
+}
+
+func (c *Client) YandexAuthorize(ctx context.Context, state, code string) (*handler.Tokens, error) {
+	resp, err := c.api.YandexAuthorize(ctx, &authv1.YandexAuthorizeRequest{
+		State: state,
+		Code:  code,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &handler.Tokens{
+		AccessToken:       resp.GetAccessToken(),
+		RefreshToken:      resp.GetRefreshToken(),
+		Access_expire_at:  resp.GetAccessExpireAt().AsTime(),
+		Refresh_expire_at: resp.GetRefreshExpireAt().AsTime(),
+	}, nil
+}
+
 func (c *Client) GoogleLoginURL(ctx context.Context) (string, error) {
 	resp, err := c.api.GoogleLoginURL(ctx, &authv1.GoogleLoginURLRequest{})
 	if err != nil {
