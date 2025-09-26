@@ -42,12 +42,12 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
 
+	//middlewares
+
 	loggingMiddleware, err := logger.NewLoggingMiddleware(ctx)
 	if err != nil {
 		panic(err)
 	}
-
-	//middlewares
 
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
@@ -58,6 +58,8 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	router.Get("/api/v1/auth/google/login", AuthHandler.GoogleLoginURL)
 	router.Get("/api/v1/auth/google/callback", AuthHandler.GoogleAuthorize)
+	router.Get("/api/v1/auth/yandex/login", AuthHandler.YandexLoginURL)
+	router.Get("/api/v1/auth/yandex/callback", AuthHandler.YandexAuthorize)
 	router.Delete("/api/v1/auth/logout", AuthHandler.Logout)
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
 
