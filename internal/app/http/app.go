@@ -9,6 +9,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	authMid "github.com/hesoyamTM/nbf-auth/pkg/auth"
+	decodeKeys "github.com/hesoyamTM/nbf-auth/pkg/config"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -49,10 +51,27 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		panic(err)
 	}
 
+	authMethods := map[string]bool{
+		"/api/v1/auth/google/login":    false,
+		"/api/v1/auth/google/callback": false,
+		"/api/v1/auth/yandex/login":    false,
+		"/api/v1/auth/yandex/callback": false,
+		"/api/v1/auth/logout":          true,
+		"/api/v1/auth/refresh":         false,
+	}
+
+	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+
+	authMiddleware := authMid.NewAuthMiddleware("access_token", authMethods, pubKey)
+
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 	router.Use(loggingMiddleware)
+	router.Use(authMiddleware)
 
 	//auth
 

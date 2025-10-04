@@ -4,6 +4,7 @@ import (
 	handler "api-gateway/internal/ports/handlers/auth_handler"
 	"context"
 
+	authInt "github.com/hesoyamTM/nbf-auth/pkg/auth"
 	authv1 "github.com/hesoyamTM/nbf-protos/gen/go/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,7 +15,10 @@ type Client struct {
 }
 
 func New(ctx context.Context, address string) (*Client, error) {
-	cc, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(authInt.SettingMetadataInterceptor()),
+	)
 	if err != nil {
 		return nil, err
 	}
