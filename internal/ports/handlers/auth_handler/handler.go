@@ -141,7 +141,7 @@ func (c *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	if err := c.authClient.Logout(ctx, refreshCookie.Value); err != nil {
 		log.Error("Logout failed", zap.Error(err))
 
-		http.Error(w, "Logout failed", http.StatusBadRequest)
+		http.Error(w, "Logout failed", http.StatusInternalServerError)
 
 		return
 	}
