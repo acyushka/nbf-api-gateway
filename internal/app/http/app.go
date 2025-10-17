@@ -2,8 +2,10 @@ package httpapp
 
 import (
 	"api-gateway/internal/clients/auth"
+	"api-gateway/internal/clients/user"
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
+	"api-gateway/internal/ports/handlers/user_handler"
 	"context"
 	"net/http"
 
@@ -22,6 +24,7 @@ type App struct {
 
 type Clients struct {
 	AuthService_Addr string
+	UserService_Addr string
 }
 
 func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
@@ -35,14 +38,19 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	//New Clients
 
 	AuthClient, err := auth.New(ctx, clients.AuthService_Addr)
-
 	if err != nil {
 		log.Error("failed to connect auth client", zap.Error(err))
+	}
+
+	UserClient, err := user.New(ctx, clients.UserService_Addr)
+	if err != nil {
+		log.Error("failed to connect user client", zap.Error(err))
 	}
 
 	//handlers
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
+	UserHandler := user_handler.NewUserHandler(UserClient)
 
 	//middlewares
 
@@ -81,6 +89,14 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Get("/api/v1/auth/yandex/callback", AuthHandler.YandexAuthorize)
 	router.Delete("/api/v1/auth/logout", AuthHandler.Logout)
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
+
+	//user
+
+	router.Post("/api/v1/user", UserHandler.CreateUser)
+	router.Get("/api/v1/user/{uid}", UserHandler.GetUser)
+	router.Get("/api/v1/users", UserHandler.GetUsers)
+	router.Put("/api/v1/user/{uid}", UserHandler.UpdateUser)
+	router.Delete("/api/v1/user/{uid}", UserHandler.DeleteUser)
 
 	//server
 
