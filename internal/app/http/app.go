@@ -14,6 +14,7 @@ import (
 	authMid "github.com/hesoyamTM/nbf-auth/pkg/auth"
 	decodeKeys "github.com/hesoyamTM/nbf-auth/pkg/config"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )
 
@@ -82,7 +83,6 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Use(authMiddleware)
 
 	//auth
-
 	router.Get("/api/v1/auth/google/login", AuthHandler.GoogleLoginURL)
 	router.Get("/api/v1/auth/google/callback", AuthHandler.GoogleAuthorize)
 	router.Get("/api/v1/auth/yandex/login", AuthHandler.YandexLoginURL)
@@ -91,15 +91,18 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
 
 	//user
-
 	router.Post("/api/v1/user", UserHandler.CreateUser)
 	router.Get("/api/v1/user/{uid}", UserHandler.GetUser)
 	router.Get("/api/v1/users", UserHandler.GetUsers)
 	router.Put("/api/v1/user/{uid}", UserHandler.UpdateUser)
 	router.Delete("/api/v1/user/{uid}", UserHandler.DeleteUser)
 
-	//server
+	//swagger
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+	))
 
+	//server
 	httpServer := http.Server{
 		Addr:         cfg.HTTP_Server.Address,
 		Handler:      router,

@@ -6,15 +6,17 @@ type User struct {
 	Surname     string
 	Contacts    []string
 	Description string
-}
+} // @name User
 
-type GetUsersResponce struct {
+// @Description Get users response
+type GetUsersResponse struct {
 	users []*User
-}
+} // @name GetUsersResponse
 
+// @Description Update user request
 type UpdateUserRequest struct {
 	Name        string
 	Surname     string
 	Contacts    []string
 	Description string
-}
+} // @name UpdateUserRequest

@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "api-gateway/docs"
 	"api-gateway/internal/app"
 	httpapp "api-gateway/internal/app/http"
 	"api-gateway/internal/config"
@@ -13,6 +14,11 @@ import (
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
 )
 
+// @title nbf API
+// @version 1.0
+// @description API Gateway for nbf-project
+// @host localhost:8082
+// @BasePath /api/v1
 func main() {
 	cfg := cfgtools.MustParseConfig[config.Config]()
 	ctx, err := logger.SetupLogger(context.Background(), cfg.Env)

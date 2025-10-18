@@ -29,6 +29,15 @@ func NewUserHandler(userClient UserClient) *UserHandler {
 	}
 }
 
+// @Summary Create user
+// @Description Создать нового пользователя в системе
+// @Tags user
+// @Accept json
+// @Param user body User true "User data"
+// @Success 201 "User created successfully"
+// @Failure 400
+// @Failure 500
+// @Router /user [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -68,6 +77,17 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusCreated)
 }
 
+// @Summary Get user
+// @Description Найти пользователя по ID
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param uid path string true "User id"
+// @Success 200 {object} User
+// @Failure 400
+// @Failure 404
+// @Failure 500
+// @Router /user/{uid} [get]
 func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -91,6 +111,16 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+// @Summary Get users
+// @Description Найти несколько пользователей по ID
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param uids query string true "Comma-separated user IDs" example("id1,id2,id3")
+// @Success 200 {object} GetUsersResponse
+// @Failure 400
+// @Failure 500
+// @Router /users [get]
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -118,7 +148,7 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := &GetUsersResponce{
+	response := &GetUsersResponse{
 		users: users,
 	}
 
@@ -126,6 +156,16 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+// @Summary Update user
+// @Description Обновить данные пользователя пользователя в системе
+// @Tags user
+// @Accept json
+// @Param uid path string true "User ID"
+// @Param request body UpdateUserRequest true "User data"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /user/{uid} [put]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -163,6 +203,14 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// @Summary Delete user
+// @Description Удалить пользователя из системы
+// @Tags user
+// @Accept json
+// @Param uid path string true "User ID"
+// @Success 200
+// @Failure 500
+// @Router /user/{uid} [delete]
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {

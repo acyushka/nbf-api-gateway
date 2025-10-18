@@ -112,6 +112,17 @@ func NewAuthHandler(authClient AuthClient) *AuthHandler {
 
 }
 */
+
+// @Summary Logout
+// @Description Logout user
+// @Tags auth
+// @Accept json
+// @Header 200 {string} Set-Cookie "access_token=<access_token>; HttpOnly;"
+// Header 200 {string} Set-Cookie "refresh_token=<refresh_token>; HttpOnly;"
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Router /auth/logout [delete]
 func (c *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -171,6 +182,17 @@ func (c *AuthHandler) VerifyPhoneNumber(w http.ResponseWriter, r *http.Request) 
 
 }
 */
+
+// @Summary Refresh tokens
+// @Description Обновляет access и refresh токены
+// @Tags auth
+// @Accept json
+// @Header 200 {string} Set-Cookie "access_token=<access_token>; HttpOnly;"
+// Header 200 {string} Set-Cookie "refresh_token=<refresh_token>; HttpOnly;"
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Router /auth/refresh [head]
 func (c *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -226,6 +248,14 @@ func (c *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+// @Summary Google Yandex URL
+// @Description Получить ссылку на авторизацию Yandex OAuth
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 500
+// @Router /auth/yandex/login [get]
 func (c *AuthHandler) YandexLoginURL(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -252,6 +282,18 @@ func (c *AuthHandler) YandexLoginURL(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+// @Summary Yandex authorize
+// @Description Authorize user using Yandex OAuth callback
+// @Tags auth
+// @Accept json
+// @Param state query string true "OAuth state parameter"
+// @Param code query string true "OAuth authorization code"
+// @Header 200 {string} Set-Cookie "access_token=<access_token>; HttpOnly;"
+// Header 200 {string} Set-Cookie "refresh_token=<refresh_token>; HttpOnly;"
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Router /auth/yandex/callback [get]
 func (c *AuthHandler) YandexAuthorize(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -293,6 +335,14 @@ func (c *AuthHandler) YandexAuthorize(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+// @Summary Google login URL
+// @Description Получить ссылку на авторизацию Google OAuth
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 500
+// @Router /auth/google/login [get]
 func (c *AuthHandler) GoogleLoginURL(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -319,6 +369,18 @@ func (c *AuthHandler) GoogleLoginURL(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusOK)
 }
 
+// @Summary Google authorize
+// @Description Authorize user using Google OAuth callback
+// @Tags auth
+// @Accept json
+// @Param state query string true "OAuth state parameter"
+// @Param code query string true "OAuth authorization code"
+// @Header 200 {string} Set-Cookie "access_token=<access_token>; HttpOnly;"
+// Header 200 {string} Set-Cookie "refresh_token=<refresh_token>; HttpOnly;"
+// @Failure 400
+// @Failure 401
+// @Failure 500
+// @Router /auth/google/callback [get]
 func (c *AuthHandler) GoogleAuthorize(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
