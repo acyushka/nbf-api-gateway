@@ -26,7 +26,7 @@ ARG TARGETARCH
 # source code into the container.
 RUN --mount=type=cache,target=/go/pkg/mod/ \
     --mount=type=bind,target=. \
-    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/server ./cmd
+    CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/api-gateway ./cmd
 
 # Runtime stage
 FROM alpine:latest AS final
@@ -51,6 +51,8 @@ RUN adduser \
     appuser
 
 USER appuser
+
+COPY --from=build --chown=appuser:appuser /bin/api-gateway /bin/
 
 EXPOSE 8082
 
