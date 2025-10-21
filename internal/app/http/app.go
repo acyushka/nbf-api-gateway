@@ -6,6 +6,7 @@ import (
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
 	"api-gateway/internal/ports/handlers/user_handler"
+	"api-gateway/internal/ports/middlewares"
 	"context"
 	"net/http"
 
@@ -76,6 +77,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	authMiddleware := authMid.NewAuthMiddleware("access_token", authMethods, pubKey)
 
+	router.Use(middlewares.Cors)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
