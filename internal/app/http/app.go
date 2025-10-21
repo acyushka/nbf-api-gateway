@@ -77,7 +77,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	authMiddleware := authMid.NewAuthMiddleware("access_token", authMethods, pubKey)
 
-	router.Use(middlewares.Cors)
+	router.Use(middlewares.Cors(cfg))
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
