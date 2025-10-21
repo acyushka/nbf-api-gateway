@@ -12,6 +12,7 @@ type Config struct {
 
 type GrpcClients struct {
 	AuthService string `yaml:"auth_service_address"`
+	UserService string `yaml:"user_service_address"`
 }
 
 type HttpServer struct {

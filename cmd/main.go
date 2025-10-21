@@ -35,6 +35,7 @@ func main() {
 
 	Clients := httpapp.Clients{
 		AuthService_Addr: cfg.GRPC_Clients.AuthService,
+		UserService_Addr: cfg.GRPC_Clients.UserService,
 	}
 
 	application := app.NewApp(ctx, cfg, Clients)
