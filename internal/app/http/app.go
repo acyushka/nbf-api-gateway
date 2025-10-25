@@ -2,9 +2,11 @@ package httpapp
 
 import (
 	"api-gateway/internal/clients/auth"
+	"api-gateway/internal/clients/matcher"
 	"api-gateway/internal/clients/user"
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
+	"api-gateway/internal/ports/handlers/matcher_handler"
 	"api-gateway/internal/ports/handlers/user_handler"
 	"api-gateway/internal/ports/middlewares"
 	"context"
@@ -25,8 +27,9 @@ type App struct {
 }
 
 type Clients struct {
-	AuthService_Addr string
-	UserService_Addr string
+	AuthService_Addr    string
+	UserService_Addr    string
+	MatcherService_Addr string
 }
 
 func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
@@ -49,10 +52,16 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		log.Error("failed to connect user client", zap.Error(err))
 	}
 
+	MatcherClient, err := matcher.New(ctx, clients.MatcherService_Addr)
+	if err != nil {
+		log.Error("failed to connect matcher client", zap.Error(err))
+	}
+
 	//handlers
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
 	UserHandler := user_handler.NewUserHandler(UserClient)
+	MatcherHandler := matcher_handler.NewMatcherHandler(MatcherClient)
 
 	//middlewares
 
@@ -98,6 +107,20 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Get("/api/v1/users", UserHandler.GetUsers)
 	router.Put("/api/v1/user/{uid}", UserHandler.UpdateUser)
 	router.Delete("/api/v1/user/{uid}", UserHandler.DeleteUser)
+
+	//matcher
+
+	router.Post("/api/v1/matcher/form", MatcherHandler.CreateForm)
+	router.Get("/api/v1/matcher/form/{uid}", MatcherHandler.GetFormByUser)
+	router.Put("api/v1/matcher/form", MatcherHandler.UpdateForm)
+	router.Delete("api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
+	// GetGroup
+	// DeleteGroup
+	// ListGroupMembers
+	// FindGroups
+	// SendJoinRequest
+	// AcceptJoinRequest
+	// RejectJoinRequest
 
 	//swagger
 	router.Get("/swagger/*", httpSwagger.Handler(

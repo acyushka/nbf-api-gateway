@@ -34,8 +34,9 @@ func main() {
 	log.Debug("Logger is working")
 
 	Clients := httpapp.Clients{
-		AuthService_Addr: cfg.GRPC_Clients.AuthService,
-		UserService_Addr: cfg.GRPC_Clients.UserService,
+		AuthService_Addr:    cfg.GRPC_Clients.AuthService,
+		UserService_Addr:    cfg.GRPC_Clients.UserService,
+		MatcherService_Addr: cfg.GRPC_Clients.MatcherService,
 	}
 
 	application := app.NewApp(ctx, cfg, Clients)
