@@ -7,7 +7,7 @@ require github.com/hesoyamTM/nbf-protos v0.0.0-20251021235944-9cdf1332b3cc // in
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/render v1.0.3
-	github.com/hesoyamTM/nbf-auth v0.0.0-20251005054555-4fea42f79eea
+	github.com/hesoyamTM/nbf-auth v0.0.0-20251025222950-4e8ae63ac82f
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.76.0
 )

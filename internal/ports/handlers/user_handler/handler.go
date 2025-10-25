@@ -48,7 +48,12 @@ func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	uid := ctx.Value(authorization.UID).(string)
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	user, err := c.userClient.GetUser(ctx, uid)
 	if err != nil {
 		log.Error("Failed to authorize user", zap.Error(err))
