@@ -39,6 +39,31 @@ info:
   title: nbf API
   version: "1.0"
 paths:
+  /auth/getSession:
+    get:
+      consumes:
+      - application/json
+      description: Get information about user session
+      parameters:
+      - description: Authorization header
+        in: header
+        name: authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Get session
+      tags:
+      - auth
   /auth/google/callback:
     get:
       consumes:
