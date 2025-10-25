@@ -77,6 +77,9 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		"/api/v1/auth/yandex/callback": false,
 		"/api/v1/auth/logout":          true,
 		"/api/v1/auth/refresh":         false,
+		"/api/v1/user/session":         true,
+		"/api/v1/user":                 false,
+		"/api/v1/matcher/form":         true,
 	}
 
 	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
@@ -114,8 +117,8 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	router.Post("/api/v1/matcher/form", MatcherHandler.CreateForm)
 	router.Get("/api/v1/matcher/form/{uid}", MatcherHandler.GetFormByUser)
-	router.Put("api/v1/matcher/form", MatcherHandler.UpdateForm)
-	router.Delete("api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
+	router.Put("/api/v1/matcher/form", MatcherHandler.UpdateForm)
+	router.Delete("/api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
 	// GetGroup
 	// DeleteGroup
 	// ListGroupMembers

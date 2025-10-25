@@ -39,7 +39,7 @@ func NewUserHandler(userClient UserClient) *UserHandler {
 // @Success 200 {object} User
 // @Failure 401
 // @Failure 500
-// @Router /auth/getSession [get]
+// @Router /user/session [get]
 func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
