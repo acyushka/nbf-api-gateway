@@ -14,12 +14,14 @@ type LoginRequest struct {
 	PhoneNumber string
 }
 
+// @Description User logout request
 type LogoutRequest struct {
 	RefreshToken string
 }
 
 //dto for interface
 
+// @Description Access and refresh tokens with expiration times
 type Tokens struct {
 	AccessToken       string
 	RefreshToken      string

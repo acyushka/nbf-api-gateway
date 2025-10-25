@@ -2,14 +2,20 @@ package httpapp
 
 import (
 	"api-gateway/internal/clients/auth"
+	"api-gateway/internal/clients/user"
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
+	"api-gateway/internal/ports/handlers/user_handler"
+	"api-gateway/internal/ports/middlewares"
 	"context"
 	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	authMid "github.com/hesoyamTM/nbf-auth/pkg/auth"
+	decodeKeys "github.com/hesoyamTM/nbf-auth/pkg/config"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 )
 
@@ -20,6 +26,7 @@ type App struct {
 
 type Clients struct {
 	AuthService_Addr string
+	UserService_Addr string
 }
 
 func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
@@ -33,36 +40,71 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	//New Clients
 
 	AuthClient, err := auth.New(ctx, clients.AuthService_Addr)
-
 	if err != nil {
 		log.Error("failed to connect auth client", zap.Error(err))
+	}
+
+	UserClient, err := user.New(ctx, clients.UserService_Addr)
+	if err != nil {
+		log.Error("failed to connect user client", zap.Error(err))
 	}
 
 	//handlers
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
+	UserHandler := user_handler.NewUserHandler(UserClient)
+
+	//middlewares
 
 	loggingMiddleware, err := logger.NewLoggingMiddleware(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	//middlewares
+	authMethods := map[string]bool{
+		"/api/v1/auth/google/login":    false,
+		"/api/v1/auth/google/callback": false,
+		"/api/v1/auth/yandex/login":    false,
+		"/api/v1/auth/yandex/callback": false,
+		"/api/v1/auth/logout":          true,
+		"/api/v1/auth/refresh":         false,
+	}
 
+	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+
+	authMiddleware := authMid.NewAuthMiddleware("access_token", authMethods, pubKey)
+
+	router.Use(middlewares.Cors(cfg))
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 	router.Use(loggingMiddleware)
+	router.Use(authMiddleware)
 
 	//auth
-
 	router.Get("/api/v1/auth/google/login", AuthHandler.GoogleLoginURL)
 	router.Get("/api/v1/auth/google/callback", AuthHandler.GoogleAuthorize)
+	router.Get("/api/v1/auth/yandex/login", AuthHandler.YandexLoginURL)
+	router.Get("/api/v1/auth/yandex/callback", AuthHandler.YandexAuthorize)
 	router.Delete("/api/v1/auth/logout", AuthHandler.Logout)
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
 
-	//server
+	//user
+	router.Post("/api/v1/user", UserHandler.CreateUser)
+	router.Get("/api/v1/user/{uid}", UserHandler.GetUser)
+	router.Get("/api/v1/users", UserHandler.GetUsers)
+	router.Put("/api/v1/user/{uid}", UserHandler.UpdateUser)
+	router.Delete("/api/v1/user/{uid}", UserHandler.DeleteUser)
 
+	//swagger
+	router.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+	))
+
+	//server
 	httpServer := http.Server{
 		Addr:         cfg.HTTP_Server.Address,
 		Handler:      router,
