@@ -102,6 +102,8 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
 
 	//user
+
+	router.Get("/api/v1/user/session", UserHandler.GetSession)
 	router.Post("/api/v1/user", UserHandler.CreateUser)
 	router.Get("/api/v1/user/{uid}", UserHandler.GetUser)
 	router.Get("/api/v1/users", UserHandler.GetUsers)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	authorization "github.com/hesoyamTM/nbf-auth/pkg/auth"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -27,6 +28,35 @@ func NewUserHandler(userClient UserClient) *UserHandler {
 	return &UserHandler{
 		userClient: userClient,
 	}
+}
+
+// @Summary Get session
+// @Description Get information about user session
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param authorization header string true "Authorization header"
+// @Success 200 {object} User
+// @Failure 401
+// @Failure 500
+// @Router /auth/getSession [get]
+func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	ctx := r.Context()
+	uid := ctx.Value(authorization.UID).(string)
+	user, err := c.userClient.GetUser(ctx, uid)
+	if err != nil {
+		log.Error("Failed to authorize user", zap.Error(err))
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	render.JSON(w, r, user)
 }
 
 // @Summary Create user
