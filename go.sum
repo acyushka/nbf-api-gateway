@@ -68,6 +68,8 @@ github.com/hesoyamTM/nbf-auth v0.0.0-20251025214420-a5b75e8d597a h1:azOEKF2QFY47
 github.com/hesoyamTM/nbf-auth v0.0.0-20251025214420-a5b75e8d597a/go.mod h1:JtXC9Yw8+8ooNJSSHBISapBHwPQjktFCV8ctGDrLtuY=
 github.com/hesoyamTM/nbf-auth v0.0.0-20251025222950-4e8ae63ac82f h1:BPZEkwHzjGsVG1Er77m3fVRr1OTwo9OIjnorqXW/LF4=
 github.com/hesoyamTM/nbf-auth v0.0.0-20251025222950-4e8ae63ac82f/go.mod h1:JtXC9Yw8+8ooNJSSHBISapBHwPQjktFCV8ctGDrLtuY=
+github.com/hesoyamTM/nbf-auth v0.0.0-20251025225650-fa6011ebf39b h1:chgxBx5PnXb8ciFfhQAQKT74xwZjFXfYET8UlqznuLs=
+github.com/hesoyamTM/nbf-auth v0.0.0-20251025225650-fa6011ebf39b/go.mod h1:JtXC9Yw8+8ooNJSSHBISapBHwPQjktFCV8ctGDrLtuY=
 github.com/hesoyamTM/nbf-protos v0.0.0-20250918001214-5bb5c62dd930 h1:4SFKfIK9FZWhJ99ZO2uYWIo18mfJXSsgnsoXvTAwmPA=
 github.com/hesoyamTM/nbf-protos v0.0.0-20250918001214-5bb5c62dd930/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
 github.com/hesoyamTM/nbf-protos v0.0.0-20250927002050-b69164dc50cf h1:S0ycIj5tvcjxOEOvK6C3LGMfFZSD1KKYdQf+avHwvOg=

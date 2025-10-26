@@ -38,7 +38,7 @@ func New(ctx context.Context, address string) (*Client, error) {
 }
 
 func (c *Client) CreateUser(ctx context.Context, user *models.User) error {
-	_, err := c.api.UpdateUser(ctx, &userv1.UpdateUserRequest{
+	_, err := c.api.CreateUser(ctx, &userv1.CreateUserRequest{
 		User: &userv1.UserInfo{
 			Id:          user.ID,
 			Name:        user.Name,
