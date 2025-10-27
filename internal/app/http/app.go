@@ -78,7 +78,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		"/api/v1/auth/logout":          true,
 		"/api/v1/auth/refresh":         false,
 		"/api/v1/user/session":         true,
-		"/api/v1/user":                 false,
+		"/api/v1/user":                 true,
 		"/api/v1/matcher/form":         true,
 	}
 
@@ -110,8 +110,8 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Post("/api/v1/user", UserHandler.CreateUser)
 	router.Get("/api/v1/user/{uid}", UserHandler.GetUser)
 	router.Get("/api/v1/users", UserHandler.GetUsers)
-	router.Put("/api/v1/user/{uid}", UserHandler.UpdateUser)
-	router.Delete("/api/v1/user/{uid}", UserHandler.DeleteUser)
+	router.Put("/api/v1/user", UserHandler.UpdateUser)
+	router.Delete("/api/v1/user", UserHandler.DeleteUser)
 
 	//matcher
 

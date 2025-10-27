@@ -199,16 +199,15 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 // @Param request body UpdateUserRequest true "User data"
 // @Success 200
 // @Failure 400
+// @Failure 401
 // @Failure 500
-// @Router /user/{uid} [put]
+// @Router /user [put]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
 		return
 	}
-
-	uid := chi.URLParam(r, "uid")
 
 	var req UpdateUserRequest
 
@@ -220,6 +219,13 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	err = h.userClient.UpdateUser(ctx, &User{
 		ID:          uid,
 		Name:        req.Name,
@@ -244,8 +250,9 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 // @Accept json
 // @Param uid path string true "User ID"
 // @Success 200
+// @Failure 401
 // @Failure 500
-// @Router /user/{uid} [delete]
+// @Router /user [delete]
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
 	if err != nil {
@@ -253,9 +260,14 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uid := chi.URLParam(r, "uid")
-
 	ctx := r.Context()
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	if err := h.userClient.DeleteUser(ctx, uid); err != nil {
 		log.Error("Failed to delete user", zap.Error(err))
 

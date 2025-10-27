@@ -23,9 +23,9 @@ type MatcherClient interface {
 	DeleteGroup(ctx context.Context, oid string) error
 	ListGroupMembers(ctx context.Context, gid string) ([]*Form, error)
 	//FindGroup Service
-	FindGroups(ctx context.Context, uid string) ([]*Group, error)
+	FindGroups(ctx context.Context, uid string) ([]*GroupWithScore, error)
 	//Group Service
-	SendJoinRequest(ctx context.Context, uid string, gid string) error //айди вернуть
+	SendJoinRequest(ctx context.Context, uid string, gid string) (string, error)
 	AcceptJoinRequest(ctx context.Context, oid string, rid string) error
 	RejectJoinRequest(ctx context.Context, oid string, rid string) error
 }
@@ -258,7 +258,7 @@ func (h *MatcherHandler) FindGroups(w http.ResponseWriter, r *http.Request) {
 	uid := chi.URLParam(r, "uid")
 
 	ctx := r.Context()
-	groups, err := h.matcherClient.FindGroups(ctx, uid)
+	GroupsWithScore, err := h.matcherClient.FindGroups(ctx, uid)
 	if err != nil {
 		log.Error("Failed to find Groups", zap.Error(err))
 		http.Error(w, "Failed to find Groups", http.StatusInternalServerError)
@@ -266,7 +266,7 @@ func (h *MatcherHandler) FindGroups(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := &FindGroupsResponse{
-		Groups: groups,
+		GroupsWithScore: GroupsWithScore,
 	}
 
 	render.JSON(w, r, response)
@@ -299,12 +299,16 @@ func (h *MatcherHandler) SendJoinRequest(w http.ResponseWriter, r *http.Request)
 	}
 
 	ctx := r.Context()
-	if err := h.matcherClient.SendJoinRequest(ctx, req.UserID, req.GroupID); err != nil {
+	rid, err := h.matcherClient.SendJoinRequest(ctx, req.UserID, req.GroupID)
+	if err != nil {
 		log.Error("Failed to send Join Request", zap.Error(err))
 		http.Error(w, "Failed to send Join Request", http.StatusInternalServerError)
 		return
 	}
 
+	render.JSON(w, r, map[string]string{
+		"request_id": rid,
+	})
 	render.Status(r, http.StatusOK)
 }
 

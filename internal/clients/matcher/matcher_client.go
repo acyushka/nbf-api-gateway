@@ -5,6 +5,7 @@ import (
 
 	dto "api-gateway/internal/ports/handlers/matcher_handler"
 
+	authInt "github.com/hesoyamTM/nbf-auth/pkg/auth"
 	matcherv1 "github.com/hesoyamTM/nbf-protos/gen/go/matcher"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,7 +19,10 @@ type Client struct {
 }
 
 func New(ctx context.Context, address string) (*Client, error) {
-	cc, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.NewClient(address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(authInt.SettingMetadataInterceptor()),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +135,7 @@ func (c *Client) ListGroupMembers(ctx context.Context, gid string) ([]*dto.Form,
 
 ///////////////////////////////////////////
 
-func (c *Client) FindGroups(ctx context.Context, uid string) ([]*dto.Group, error) {
+func (c *Client) FindGroups(ctx context.Context, uid string) ([]*dto.GroupWithScore, error) {
 	resp, err := c.FindGroupsServiceApi.FindGroups(ctx, &matcherv1.FindGroupsRequest{
 		UserId: uid,
 	})
@@ -139,30 +143,36 @@ func (c *Client) FindGroups(ctx context.Context, uid string) ([]*dto.Group, erro
 		return nil, err
 	}
 
-	groups := make([]*dto.Group, len(resp.GetGroups()))
-	for i, group := range resp.GetGroups() {
-		groups[i] = &dto.Group{
-			Id:         group.GetId(),
-			OwnerID:    group.GetOwnerId(),
-			Parameters: ParametersFromProto(group.GetParameters()),
-			MaxUsers:   group.GetMaxUsers(),
-			Created_at: group.GetCreatedAt().AsTime(),
-			Updated_at: group.GetUpdatedAt().AsTime(),
+	groupsWithScore := make([]*dto.GroupWithScore, len(resp.GetGroups()))
+	for i, groupWithScore := range resp.GetGroups() {
+		groupsWithScore[i] = &dto.GroupWithScore{
+			Group: dto.Group{
+				Id:         groupWithScore.GetGroup().GetId(),
+				OwnerID:    groupWithScore.GetGroup().GetOwnerId(),
+				Parameters: ParametersFromProto(groupWithScore.GetGroup().GetParameters()),
+				MaxUsers:   groupWithScore.GetGroup().GetMaxUsers(),
+				Created_at: groupWithScore.GetGroup().GetCreatedAt().AsTime(),
+				Updated_at: groupWithScore.GetGroup().GetUpdatedAt().AsTime(),
+			},
+			Score: groupWithScore.GetScore(),
 		}
 	}
 
-	return groups, nil
+	return groupsWithScore, nil
 }
 
 ///////////////////////////////////////////
 
-func (c *Client) SendJoinRequest(ctx context.Context, uid string, gid string) error {
-	_, err := c.GroupServiceApi.SendJoinRequest(ctx, &matcherv1.SendJoinRequestRequest{
+func (c *Client) SendJoinRequest(ctx context.Context, uid string, gid string) (string, error) {
+	resp, err := c.GroupServiceApi.SendJoinRequest(ctx, &matcherv1.SendJoinRequestRequest{
 		UserId:  uid,
 		GroupId: gid,
 	})
+	if err != nil {
+		return "", err
+	}
 
-	return err
+	return resp.GetRequestId(), nil
 }
 
 func (c *Client) AcceptJoinRequest(ctx context.Context, oid string, rid string) error {

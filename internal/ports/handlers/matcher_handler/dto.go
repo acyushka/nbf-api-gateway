@@ -22,6 +22,11 @@ type Group struct {
 	Updated_at time.Time
 }
 
+type GroupWithScore struct {
+	Group Group
+	Score float32
+}
+
 type Point struct {
 	Lat float64
 	Lon float64
@@ -49,7 +54,7 @@ type ListGroupMembersResponse struct {
 }
 
 type FindGroupsResponse struct {
-	Groups []*Group `json:"Groups"`
+	GroupsWithScore []*GroupWithScore `json:"GroupsWithScore"`
 }
 
 // Constants
