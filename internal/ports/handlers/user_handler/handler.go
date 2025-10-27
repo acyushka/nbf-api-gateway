@@ -38,6 +38,7 @@ func NewUserHandler(userClient UserClient) *UserHandler {
 // @Param authorization header string true "Authorization header"
 // @Success 200 {object} User
 // @Failure 401
+// @Failure 404
 // @Failure 500
 // @Router /user/session [get]
 func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
