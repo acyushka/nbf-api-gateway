@@ -219,6 +219,8 @@ func (h *MatcherHandler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to delete group", http.StatusInternalServerError)
 		return
 	}
+
+	render.Status(r, http.StatusOK)
 }
 
 func (h *MatcherHandler) ListGroupMembers(w http.ResponseWriter, r *http.Request) {

@@ -119,13 +119,16 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Get("/api/v1/matcher/form/{uid}", MatcherHandler.GetFormByUser)
 	router.Put("/api/v1/matcher/form", MatcherHandler.UpdateForm)
 	router.Delete("/api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
-	// GetGroup
-	// DeleteGroup
-	// ListGroupMembers
-	// FindGroups
-	// SendJoinRequest
-	// AcceptJoinRequest
-	// RejectJoinRequest
+
+	router.Get("/api/v1/matcher/group/{gid}", MatcherHandler.GetGroup)
+	router.Delete("/api/v1/matcher/group/{oid}", MatcherHandler.DeleteGroup)
+	router.Get("/api/v1/matcher/group/members/{gid}", MatcherHandler.ListGroupMembers)
+
+	router.Get("/api/v1/matcher/find/{uid}", MatcherHandler.FindGroups)
+
+	router.Post("/api/v1/matcher/group/send", MatcherHandler.SendJoinRequest)
+	router.Post("/api/v1/matcher/group/accept", MatcherHandler.AcceptJoinRequest)
+	router.Post("/api/v1/matcher/group/reject", MatcherHandler.RejectJoinRequest)
 
 	//swagger
 	router.Get("/swagger/*", httpSwagger.Handler(
