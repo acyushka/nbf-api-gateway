@@ -5,73 +5,53 @@ import (
 )
 
 type Form struct {
-	Id         string
-	UserID     string
-	Parameters Parameters
-	Active     bool
-	Created_at time.Time
-	Updated_at time.Time
+	Id         string     `json:"id"`
+	UserID     string     `json:"user_id"`
+	Parameters Parameters `json:"parameters"`
+	Active     bool       `json:"active"`
+	Created_at time.Time  `json:"created_at"`
+	Updated_at time.Time  `json:"updated_at"`
 }
 
 type Group struct {
-	Id         string
-	OwnerID    string
-	Parameters Parameters
-	MaxUsers   int32
-	Created_at time.Time
-	Updated_at time.Time
+	Id         string     `json:"id"`
+	OwnerID    string     `json:"owner_id"`
+	Parameters Parameters `json:"parameters"`
+	MaxUsers   int32      `json:"max_users"`
+	Created_at time.Time  `json:"created_at"`
+	Updated_at time.Time  `json:"updated_at"`
 }
 
 type GroupWithScore struct {
-	Group Group
-	Score float32
+	Group Group   `json:"group"`
+	Score float32 `json:"score"`
 }
 
 type Point struct {
-	Lat float64
-	Lon float64
+	Lat float64 `json:"lat"`
+	Lon float64 `json:"lon"`
 }
 
 type Parameters struct {
-	Name           string
-	Surname        string
-	Geo            Point
-	Photos         []string
-	Budget         int32
-	RoomCount      int32
-	RoommatesCount int32
-	Age            int32
-	Smoking        bool
-	Alko           bool
-	Pet            bool
-	Sex            string
-	UserType       string
-	Description    string
+	Name           string   `json:"name,omitempty"`
+	Surname        string   `json:"surname,omitempty"`
+	Geo            Point    `json:"geo,omitempty"`
+	Photos         []string `json:"photos,omitempty"`
+	Budget         int32    `json:"budget,omitempty"`
+	RoomCount      int32    `json:"room_count,omitempty"`
+	RoommatesCount int32    `json:"roommates_count,omitempty"`
+	Age            int32    `json:"age,omitempty"`
+	Smoking        bool     `json:"smoking,omitempty"`
+	Alko           bool     `json:"alko,omitempty"`
+	Pet            bool     `json:"pet,omitempty"`
+	Sex            string   `json:"sex,omitempty"`
+	UserType       string   `json:"user_type,omitempty"`
+	Description    string   `json:"description,omitempty"`
 }
-
 type ListGroupMembersResponse struct {
-	Forms []*Form `json:"Forms"`
+	Forms []*Form `json:"forms"`
 }
 
 type FindGroupsResponse struct {
-	GroupsWithScore []*GroupWithScore `json:"GroupsWithScore"`
+	GroupsWithScore []*GroupWithScore `json:"groups_with_score"`
 }
-
-// Constants
-
-// type Sex string
-
-// const (
-// 	SexUnspecified Sex = "unspecified"
-// 	SexMale        Sex = "male"
-// 	SexFemale      Sex = "female"
-// )
-
-// type UserType string
-
-// const (
-// 	UserTypeUnspecified UserType = "unspecified"
-// 	UserTypeStudent     UserType = "student"
-// 	UserTypeWorker      UserType = "worker"
-// 	UserTypeTourist     UserType = "tourist"
-// )
