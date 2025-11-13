@@ -40,6 +40,7 @@ type Parameters struct {
 	Budget         int32    `json:"budget,omitempty"`
 	RoomCount      int32    `json:"room_count,omitempty"`
 	RoommatesCount int32    `json:"roommates_count,omitempty"`
+	Months         int32    `json:"months,omitempty"`
 	Age            int32    `json:"age,omitempty"`
 	Smoking        bool     `json:"smoking,omitempty"`
 	Alko           bool     `json:"alko,omitempty"`
@@ -54,4 +55,11 @@ type ListGroupMembersResponse struct {
 
 type FindGroupsResponse struct {
 	GroupsWithScore []*GroupWithScore `json:"groups_with_score"`
+}
+
+type GroupRequest struct {
+	ID        string    `json:"id"`
+	GroupID   string    `json:"group_id"`
+	UserID    string    `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
 }

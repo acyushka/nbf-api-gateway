@@ -64,6 +64,7 @@ func (c *Client) GetFormByUser(ctx context.Context, uid string) (*dto.Form, erro
 		Updated_at: resp.GetUpdatedAt().AsTime(),
 	}, nil
 }
+
 func (c *Client) UpdateForm(ctx context.Context, uid string, protoParams *matcherv1.Parameters) error {
 	_, err := c.FormServiceApi.UpdateForm(ctx, &matcherv1.UpdateFormRequest{
 		UserId:     uid,
@@ -193,6 +194,26 @@ func (c *Client) RejectJoinRequest(ctx context.Context, oid string, rid string) 
 	return err
 }
 
+func (c *Client) GetRequests(ctx context.Context, groupId string) ([]*dto.GroupRequest, error) {
+	resp, err := c.GroupServiceApi.GetReqeusts(ctx, &matcherv1.GetReqeustsRequest{
+		GroupId: groupId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	requests := make([]*dto.GroupRequest, len(resp.GetRequests()))
+	for i, request := range resp.GetRequests() {
+		requests[i] = &dto.GroupRequest{
+			ID:        request.GetId(),
+			GroupID:   request.GetGroupId(),
+			UserID:    request.GetUserId(),
+			CreatedAt: request.GetCreatedAt().AsTime(),
+		}
+	}
+	return requests, nil
+}
+
 // Внутрянка
 
 func ParametersFromProto(protoParams *matcherv1.Parameters) dto.Parameters {
@@ -208,6 +229,7 @@ func ParametersFromProto(protoParams *matcherv1.Parameters) dto.Parameters {
 		Budget:         protoParams.GetBudget(),
 		RoomCount:      protoParams.GetRoomCount(),
 		RoommatesCount: protoParams.GetRoommatesCount(),
+		Months:         protoParams.GetMonth(),
 		Age:            protoParams.GetAge(),
 		Smoking:        protoParams.GetSmoking(),
 		Alko:           protoParams.GetAlko(),

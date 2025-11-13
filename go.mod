@@ -2,12 +2,12 @@ module api-gateway
 
 go 1.25.0
 
-require github.com/hesoyamTM/nbf-protos v0.0.0-20251026185628-57115568dd8b // indirectS
+require github.com/hesoyamTM/nbf-protos v0.0.0-20251110084836-68371396f0f5 // indirectS
 
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/render v1.0.3
-	github.com/hesoyamTM/nbf-auth v0.0.0-20251026130018-a20a1af83d9e
+	github.com/hesoyamTM/nbf-auth v0.0.0-20251110084105-a266b4a39116
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.76.0
 )

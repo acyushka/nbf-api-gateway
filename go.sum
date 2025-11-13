@@ -72,6 +72,8 @@ github.com/hesoyamTM/nbf-auth v0.0.0-20251025225650-fa6011ebf39b h1:chgxBx5PnXb8
 github.com/hesoyamTM/nbf-auth v0.0.0-20251025225650-fa6011ebf39b/go.mod h1:JtXC9Yw8+8ooNJSSHBISapBHwPQjktFCV8ctGDrLtuY=
 github.com/hesoyamTM/nbf-auth v0.0.0-20251026130018-a20a1af83d9e h1:XBOde51CzNz4rLJOWYGXbA4LHtJLTKrszvciKGuYCq8=
 github.com/hesoyamTM/nbf-auth v0.0.0-20251026130018-a20a1af83d9e/go.mod h1:DG3SBJ2VcriA26sd9XavAyoDc4SJvUoTzBBT+IQhSBk=
+github.com/hesoyamTM/nbf-auth v0.0.0-20251110084105-a266b4a39116 h1:S179YN1PIIL5+jlgLMwx/Lu39YQGgDTS0W+NF/LiZLA=
+github.com/hesoyamTM/nbf-auth v0.0.0-20251110084105-a266b4a39116/go.mod h1:DG3SBJ2VcriA26sd9XavAyoDc4SJvUoTzBBT+IQhSBk=
 github.com/hesoyamTM/nbf-protos v0.0.0-20250918001214-5bb5c62dd930 h1:4SFKfIK9FZWhJ99ZO2uYWIo18mfJXSsgnsoXvTAwmPA=
 github.com/hesoyamTM/nbf-protos v0.0.0-20250918001214-5bb5c62dd930/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
 github.com/hesoyamTM/nbf-protos v0.0.0-20250927002050-b69164dc50cf h1:S0ycIj5tvcjxOEOvK6C3LGMfFZSD1KKYdQf+avHwvOg=
@@ -80,6 +82,8 @@ github.com/hesoyamTM/nbf-protos v0.0.0-20251021235944-9cdf1332b3cc h1:uQrSYdiCBK
 github.com/hesoyamTM/nbf-protos v0.0.0-20251021235944-9cdf1332b3cc/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
 github.com/hesoyamTM/nbf-protos v0.0.0-20251026185628-57115568dd8b h1:Zrj5zrGLUv2v1lEjB/Z1Tbmkhahzpes0+JwAvMNSBhA=
 github.com/hesoyamTM/nbf-protos v0.0.0-20251026185628-57115568dd8b/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
+github.com/hesoyamTM/nbf-protos v0.0.0-20251110084836-68371396f0f5 h1:o2nD7p6WdNfglvgxLcdznc98oCtjBX+Ns7pDLXYttSY=
+github.com/hesoyamTM/nbf-protos v0.0.0-20251110084836-68371396f0f5/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
 github.com/ilyakaznacheev/cleanenv v1.5.0 h1:0VNZXggJE2OYdXE87bfSSwGxeiGt9moSR2lOrsHHvr4=
 github.com/ilyakaznacheev/cleanenv v1.5.0/go.mod h1:a5aDzaJrLCQZsazHol1w8InnDcOX0OColm64SlIi6gk=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
