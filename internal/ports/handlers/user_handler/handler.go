@@ -150,6 +150,16 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user.Avatar != "" {
+		url, err := h.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
+		if err != nil {
+			log.Error("Failed to get presigned url", zap.Error(err))
+			http.Error(w, "Photo is not founded", http.StatusNotFound)
+			return
+		}
+		user.Avatar = url
+	}
+
 	render.JSON(w, r, user)
 
 	render.Status(r, http.StatusOK)
@@ -192,8 +202,25 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var result []*User
+
+	for _, user := range users {
+		if user.Avatar != "" {
+			url, err := h.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
+			if err != nil {
+				log.Error("Failed to get presigned url", zap.Error(err))
+				http.Error(w, "Photo is not founded", http.StatusNotFound)
+				return
+			}
+
+			user.Avatar = url
+		}
+
+		result = append(result, user)
+	}
+
 	response := &GetUsersResponse{
-		users: users,
+		users: result,
 	}
 
 	render.JSON(w, r, response)
@@ -308,35 +335,6 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 		return
 	}
-
-	render.Status(r, http.StatusOK)
-}
-
-func (h *UserHandler) GetPhotoURL(w http.ResponseWriter, r *http.Request) {
-	log, err := logger.LoggerFromCtx(r.Context())
-	if err != nil {
-		http.Error(w, "Internal error", http.StatusInternalServerError)
-		return
-	}
-
-	ctx := r.Context()
-	uid, ok := ctx.Value(authorization.UID).(string)
-	if !ok || uid == "" {
-		log.Error("uid not found in context")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	photoID := chi.URLParam(r, "pid")
-
-	presignedURL, err := h.fileStorageClient.GetPhotoURL(ctx, uid, photoID)
-	if err != nil {
-		log.Error("Failed to get presigned url", zap.Error(err))
-		http.Error(w, "Photo is not founded", http.StatusNotFound)
-		return
-	}
-
-	render.JSON(w, r, presignedURL)
 
 	render.Status(r, http.StatusOK)
 }

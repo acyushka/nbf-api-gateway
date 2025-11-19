@@ -34,6 +34,7 @@ type MatcherClient interface {
 
 type FileStorageClient interface {
 	UploadPhotos(ctx context.Context, userID string, files []*models.FilePhoto) ([]string, error)
+	GetPhotoURL(ctx context.Context, userID string, photoID string) (string, error)
 }
 
 type MatcherHandler struct {
@@ -125,6 +126,15 @@ func (h *MatcherHandler) GetFormByUser(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to get Form", zap.Error(err))
 		http.Error(w, "Failed to get Form", http.StatusInternalServerError)
 		return
+	}
+
+	for i, photoID := range form.Parameters.Photos {
+		url, err := h.fileStorageClient.GetPhotoURL(ctx, form.UserID, photoID)
+		if err != nil {
+			log.Error("Failed to get presigned URL", zap.Error(err))
+			continue
+		}
+		form.Parameters.Photos[i] = url
 	}
 
 	render.Status(r, http.StatusOK)
@@ -240,6 +250,15 @@ func (h *MatcherHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for i, photoID := range group.Parameters.Photos {
+		url, err := h.fileStorageClient.GetPhotoURL(ctx, group.Id, photoID)
+		if err != nil {
+			log.Error("Failed to get presigned URL", zap.Error(err))
+			continue
+		}
+		group.Parameters.Photos[i] = url
+	}
+
 	render.Status(r, http.StatusOK)
 	render.JSON(w, r, group)
 }
@@ -284,6 +303,17 @@ func (h *MatcherHandler) ListGroupMembers(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	for _, form := range forms {
+		for i, photoID := range form.Parameters.Photos {
+			photoURL, err := h.fileStorageClient.GetPhotoURL(ctx, form.UserID, photoID)
+			if err != nil {
+				log.Error("Failed to get presigned URL", zap.Error(err))
+				continue
+			}
+			form.Parameters.Photos[i] = photoURL
+		}
+	}
+
 	response := &ListGroupMembersResponse{
 		Forms: forms,
 	}
@@ -309,6 +339,20 @@ func (h *MatcherHandler) FindGroups(w http.ResponseWriter, r *http.Request) {
 		log.Error("Failed to find Groups", zap.Error(err))
 		http.Error(w, "Failed to find Groups", http.StatusInternalServerError)
 		return
+	}
+
+	for _, groupWithScore := range GroupsWithScore {
+		for i, photoID := range groupWithScore.Group.Parameters.Photos {
+			url, err := h.fileStorageClient.GetPhotoURL(ctx, groupWithScore.Group.Id, photoID)
+			if err != nil {
+				log.Error("Failed to get group photo presigned URL",
+					zap.String("photo_id", photoID),
+					zap.String("group_id", groupWithScore.Group.Id),
+					zap.Error(err))
+				continue
+			}
+			groupWithScore.Group.Parameters.Photos[i] = url
+		}
 	}
 
 	response := &FindGroupsResponse{
