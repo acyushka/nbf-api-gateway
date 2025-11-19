@@ -2,6 +2,7 @@ package user_handler
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -20,13 +21,20 @@ type UserClient interface {
 	DeleteUser(ctx context.Context, UserID string) error
 }
 
-type UserHandler struct {
-	userClient UserClient
+type FileStorageClient interface {
+	UploadAvatar(ctx context.Context, userID string, file *FilePhoto) (string, error)
+	GetPhotoURL(ctx context.Context, userID string, photoID string) (string, error)
 }
 
-func NewUserHandler(userClient UserClient) *UserHandler {
+type UserHandler struct {
+	userClient        UserClient
+	fileStorageClient FileStorageClient
+}
+
+func NewUserHandler(userClient UserClient, storageClient FileStorageClient) *UserHandler {
 	return &UserHandler{
-		userClient: userClient,
+		userClient:        userClient,
+		fileStorageClient: storageClient,
 	}
 }
 
@@ -210,21 +218,45 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req UpdateUserRequest
-
-	if err := render.DecodeJSON(r.Body, &req); err != nil {
-		log.Error("Failed to decode JSON", zap.Error(err))
-
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	if err := r.ParseMultipartForm(10485760); err != nil {
+		log.Error("Failed to parse formdata", zap.Error(err))
+		http.Error(w, "Invalid formdata", http.StatusBadRequest)
 		return
 	}
 
 	ctx := r.Context()
 	uid, ok := ctx.Value(authorization.UID).(string)
 	if !ok || uid == "" {
-		log.Error("uid not found in context")
+		log.Error("uid not found in context", zap.Error(err))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
+	}
+
+	var req UpdateUserRequest
+
+	if err := json.Unmarshal([]byte(r.FormValue("data")), &req); err != nil {
+		log.Error("Failed to decode JSON", zap.Error(err))
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// взаимодействие с s3
+	var avatar = "-1"
+	file, metadata, err := r.FormFile("avatar")
+	if err == nil {
+		defer file.Close()
+
+		avatar, err = h.fileStorageClient.UploadAvatar(ctx, uid, &FilePhoto{
+			Data:        file,
+			FileName:    metadata.Filename,
+			ContentType: metadata.Header.Get("Content-Type"),
+		})
+		if err != nil {
+			log.Error("Failed to upload avatar", zap.Error(err))
+			http.Error(w, "Failed to upload avatar", http.StatusInternalServerError)
+			return
+		}
+
 	}
 
 	err = h.userClient.UpdateUser(ctx, &User{
@@ -232,6 +264,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		Name:        req.Name,
 		Surname:     req.Surname,
 		Contacts:    req.Contacts,
+		Avatar:      avatar,
 		Description: req.Description,
 	})
 	if err != nil {
@@ -275,6 +308,35 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 		return
 	}
+
+	render.Status(r, http.StatusOK)
+}
+
+func (h *UserHandler) GetPhotoURL(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	ctx := r.Context()
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	photoID := chi.URLParam(r, "pid")
+
+	presignedURL, err := h.fileStorageClient.GetPhotoURL(ctx, uid, photoID)
+	if err != nil {
+		log.Error("Failed to get presigned url", zap.Error(err))
+		http.Error(w, "Photo is not founded", http.StatusNotFound)
+		return
+	}
+
+	render.JSON(w, r, presignedURL)
 
 	render.Status(r, http.StatusOK)
 }

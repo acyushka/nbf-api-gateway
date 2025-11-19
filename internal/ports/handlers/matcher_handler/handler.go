@@ -1,7 +1,9 @@
 package matcher_handler
 
 import (
+	models "api-gateway/internal/ports/handlers/user_handler"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -30,13 +32,19 @@ type MatcherClient interface {
 	RejectJoinRequest(ctx context.Context, oid string, rid string) error
 }
 
-type MatcherHandler struct {
-	matcherClient MatcherClient
+type FileStorageClient interface {
+	UploadPhotos(ctx context.Context, userID string, files []*models.FilePhoto) ([]string, error)
 }
 
-func NewMatcherHandler(m MatcherClient) *MatcherHandler {
+type MatcherHandler struct {
+	matcherClient     MatcherClient
+	fileStorageClient FileStorageClient
+}
+
+func NewMatcherHandler(m MatcherClient, storageClient FileStorageClient) *MatcherHandler {
 	return &MatcherHandler{
-		matcherClient: m,
+		matcherClient:     m,
+		fileStorageClient: storageClient,
 	}
 }
 
@@ -49,13 +57,19 @@ func (h *MatcherHandler) CreateForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := r.ParseMultipartForm(52428800); err != nil {
+		log.Error("Failed to parse formdata", zap.Error(err))
+		http.Error(w, "Invalid formdata", http.StatusBadRequest)
+		return
+	}
+
 	var req struct {
 		UserID     string     `json:"user_id"`
 		Parameters Parameters `json:"parameters"`
 	}
 
-	if err := render.DecodeJSON(r.Body, &req); err != nil {
-		log.Error("Failed to decode JSON", zap.Error(err))
+	if err := json.Unmarshal([]byte(r.FormValue("data")), &req); err != nil {
+		log.Error("Failed to parse JSON", zap.Error(err))
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -72,9 +86,21 @@ func (h *MatcherHandler) CreateForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
+
+	photoIDs, err := h.uploadPhotos(ctx, r, req.UserID)
+	if err != nil {
+		log.Error("Failed to upload photos", zap.Error(err))
+		http.Error(w, "Failed to upload photos", http.StatusBadRequest)
+		return
+	}
+
+	if len(photoIDs) > 0 {
+		req.Parameters.Photos = photoIDs
+	}
+
 	protoParams := toProtoParams(req.Parameters, sex, userType)
 
-	ctx := r.Context()
 	if err := h.matcherClient.CreateForm(ctx, req.UserID, protoParams); err != nil {
 		log.Error("Failed to create Form", zap.Error(err))
 		http.Error(w, "Failed to create Form", http.StatusInternalServerError)
@@ -112,13 +138,19 @@ func (h *MatcherHandler) UpdateForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := r.ParseMultipartForm(52428800); err != nil {
+		log.Error("Failed to parse formdata", zap.Error(err))
+		http.Error(w, "Invalid formdata", http.StatusBadRequest)
+		return
+	}
+
 	var req struct {
 		UserID     string     `json:"user_id"`
 		Parameters Parameters `json:"parameters"`
 	}
 
-	if err := render.DecodeJSON(r.Body, &req); err != nil {
-		log.Error("Failed to decode JSON", zap.Error(err))
+	if err := json.Unmarshal([]byte(r.FormValue("data")), &req); err != nil {
+		log.Error("Failed to parse JSON", zap.Error(err))
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -142,9 +174,21 @@ func (h *MatcherHandler) UpdateForm(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	ctx := r.Context()
+
+	photoIDs, err := h.uploadPhotos(ctx, r, req.UserID)
+	if err != nil {
+		log.Error("Failed to upload photos", zap.Error(err))
+		http.Error(w, "Failed to upload photos", http.StatusBadRequest)
+		return
+	}
+
+	if len(photoIDs) > 0 {
+		req.Parameters.Photos = photoIDs
+	}
+
 	protoParams := toProtoParams(req.Parameters, sex, userType)
 
-	ctx := r.Context()
 	if err := h.matcherClient.UpdateForm(ctx, req.UserID, protoParams); err != nil {
 		log.Error("Failed to update Form", zap.Error(err))
 		http.Error(w, "Failed to update Form", http.StatusInternalServerError)
@@ -433,4 +477,39 @@ func toProtoParams(p Parameters, sex, userType int) *matcherv1.Parameters {
 		UserType:       matcherv1.UserType(userType),
 		Description:    p.Description,
 	}
+}
+
+func (h *MatcherHandler) uploadPhotos(ctx context.Context, r *http.Request, userID string) ([]string, error) {
+	files := r.MultipartForm.File["photos"]
+	if len(files) == 0 {
+		return nil, nil
+	}
+
+	photoFiles := make([]*models.FilePhoto, 0, len(files))
+
+	for _, fileHeader := range files {
+		if fileHeader.Size > 52428800 {
+			return nil, fmt.Errorf("Invalid photo size")
+		}
+
+		file, err := fileHeader.Open()
+		if err != nil {
+			return nil, fmt.Errorf("Failed to open file: %w", err)
+		}
+		defer file.Close()
+
+		photoFiles = append(photoFiles, &models.FilePhoto{
+			Data:        file,
+			FileName:    fileHeader.Filename,
+			ContentType: fileHeader.Header.Get("Content-type"),
+		})
+
+	}
+
+	photoIDs, err := h.fileStorageClient.UploadPhotos(ctx, userID, photoFiles)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload photos: %w", err)
+	}
+
+	return photoIDs, nil
 }

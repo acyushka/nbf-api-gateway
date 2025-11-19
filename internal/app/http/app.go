@@ -3,6 +3,7 @@ package httpapp
 import (
 	"api-gateway/internal/clients/auth"
 	"api-gateway/internal/clients/matcher"
+	s3 "api-gateway/internal/clients/storage"
 	"api-gateway/internal/clients/user"
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
@@ -27,9 +28,10 @@ type App struct {
 }
 
 type Clients struct {
-	AuthService_Addr    string
-	UserService_Addr    string
-	MatcherService_Addr string
+	AuthService_Addr        string
+	UserService_Addr        string
+	MatcherService_Addr     string
+	FileStorageService_Addr string
 }
 
 func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
@@ -57,11 +59,16 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		log.Error("failed to connect matcher client", zap.Error(err))
 	}
 
+	FileStorageClient, err := s3.New(ctx, clients.FileStorageService_Addr)
+	if err != nil {
+		log.Error("failed to connect storage client", zap.Error(err))
+	}
+
 	//handlers
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
-	UserHandler := user_handler.NewUserHandler(UserClient)
-	MatcherHandler := matcher_handler.NewMatcherHandler(MatcherClient)
+	UserHandler := user_handler.NewUserHandler(UserClient, FileStorageClient)
+	MatcherHandler := matcher_handler.NewMatcherHandler(MatcherClient, FileStorageClient)
 
 	//middlewares
 
@@ -80,6 +87,8 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		"/api/v1/user/session":         true,
 		"/api/v1/user":                 true,
 		"/api/v1/matcher/form":         true,
+		"/api/v1/matcher/find":         true,
+		"/api/v1/matcher/group":        true,
 	}
 
 	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
