@@ -1,11 +1,12 @@
-env: 'dev'
+env: "dev"
 grpc_clients:
-  auth_service_address: 'localhost:60000'
-  user_service_address: 'localhost:60001'
-  matcher_service_address: 'localhost:60002'
-  file_storage_service_address: 'localhost:60005'
+  auth_service_address: "localhost:60000"
+  user_service_address: "localhost:60001"
+  matcher_service_address: "localhost:60002"
+  file_storage_service_address: "localhost:60005"
+  chat_service_address: "localhost:60006"
 http_server:
-  address: ':8082'
+  address: ":8082"
   timeout: 10s
   idle_timeout: 10s
 cors:
@@ -13,7 +14,7 @@ cors:
     - "http://localhost:8888"
   allowed_methods:
     - "GET"
-    - "POST" 
+    - "POST"
     - "PUT"
     - "DELETE"
     - "HEAD"
@@ -22,3 +23,4 @@ cors:
     - "Authorization"
     - "X-Requested-With"
   allow_credentials: true
+

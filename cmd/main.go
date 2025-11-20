@@ -1,14 +1,15 @@
 package main
 
 import (
-	_ "api-gateway/docs"
-	"api-gateway/internal/app"
-	httpapp "api-gateway/internal/app/http"
-	"api-gateway/internal/config"
 	"context"
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "api-gateway/docs"
+	"api-gateway/internal/app"
+	httpapp "api-gateway/internal/app/http"
+	"api-gateway/internal/config"
 
 	cfgtools "github.com/hesoyamTM/nbf-auth/pkg/config"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
@@ -34,9 +35,11 @@ func main() {
 	log.Debug("Logger is working")
 
 	Clients := httpapp.Clients{
-		AuthService_Addr:    cfg.GRPC_Clients.AuthService,
-		UserService_Addr:    cfg.GRPC_Clients.UserService,
-		MatcherService_Addr: cfg.GRPC_Clients.MatcherService,
+		AuthService_Addr:        cfg.GRPC_Clients.AuthService,
+		UserService_Addr:        cfg.GRPC_Clients.UserService,
+		MatcherService_Addr:     cfg.GRPC_Clients.MatcherService,
+		FileStorageService_Addr: cfg.GRPC_Clients.FileStorageService,
+		ChatService_Addr:        cfg.GRPC_Clients.ChatService,
 	}
 
 	application := app.NewApp(ctx, cfg, Clients)

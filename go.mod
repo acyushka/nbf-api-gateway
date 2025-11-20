@@ -14,6 +14,8 @@ require (
 	google.golang.org/grpc v1.77.0
 )
 
+require github.com/gorilla/websocket v1.5.3 // indirect
+
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect

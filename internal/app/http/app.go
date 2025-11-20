@@ -1,17 +1,20 @@
 package httpapp
 
 import (
+	"context"
+	"net/http"
+
 	"api-gateway/internal/clients/auth"
+	"api-gateway/internal/clients/chat"
 	"api-gateway/internal/clients/matcher"
 	s3 "api-gateway/internal/clients/storage"
 	"api-gateway/internal/clients/user"
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
+	"api-gateway/internal/ports/handlers/chat_handler"
 	"api-gateway/internal/ports/handlers/matcher_handler"
 	"api-gateway/internal/ports/handlers/user_handler"
 	"api-gateway/internal/ports/middlewares"
-	"context"
-	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -32,6 +35,7 @@ type Clients struct {
 	UserService_Addr        string
 	MatcherService_Addr     string
 	FileStorageService_Addr string
+	ChatService_Addr        string
 }
 
 func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
@@ -42,7 +46,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	router := chi.NewRouter()
 
-	//New Clients
+	// New Clients
 
 	AuthClient, err := auth.New(ctx, clients.AuthService_Addr)
 	if err != nil {
@@ -63,14 +67,19 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	if err != nil {
 		log.Error("failed to connect storage client", zap.Error(err))
 	}
+	ChatClient, err := chat.New(ctx, clients.ChatService_Addr)
+	if err != nil {
+		log.Error("failed to connect chat client", zap.Error(err))
+	}
 
-	//handlers
+	// handlers
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
 	UserHandler := user_handler.NewUserHandler(UserClient, FileStorageClient)
 	MatcherHandler := matcher_handler.NewMatcherHandler(MatcherClient, FileStorageClient)
+	ChatHandler := chat_handler.NewChatHandler(ChatClient)
 
-	//middlewares
+	// middlewares
 
 	loggingMiddleware, err := logger.NewLoggingMiddleware(ctx)
 	if err != nil {
@@ -89,6 +98,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		"/api/v1/matcher/form":         true,
 		"/api/v1/matcher/find":         true,
 		"/api/v1/matcher/group":        true,
+		"/api/v1/chat/messages":        true,
 	}
 
 	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
@@ -105,7 +115,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Use(loggingMiddleware)
 	router.Use(authMiddleware)
 
-	//auth
+	// auth
 	router.Get("/api/v1/auth/google/login", AuthHandler.GoogleLoginURL)
 	router.Get("/api/v1/auth/google/callback", AuthHandler.GoogleAuthorize)
 	router.Get("/api/v1/auth/yandex/login", AuthHandler.YandexLoginURL)
@@ -113,7 +123,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Delete("/api/v1/auth/logout", AuthHandler.Logout)
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
 
-	//user
+	// user
 
 	router.Get("/api/v1/user/session", UserHandler.GetSession)
 	router.Post("/api/v1/user", UserHandler.CreateUser)
@@ -122,7 +132,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Put("/api/v1/user", UserHandler.UpdateUser)
 	router.Delete("/api/v1/user", UserHandler.DeleteUser)
 
-	//matcher
+	// matcher
 
 	router.Post("/api/v1/matcher/form", MatcherHandler.CreateForm)
 	router.Get("/api/v1/matcher/form/{uid}", MatcherHandler.GetFormByUser)
@@ -140,12 +150,16 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Post("/api/v1/matcher/group/accept", MatcherHandler.AcceptJoinRequest)
 	router.Post("/api/v1/matcher/group/reject", MatcherHandler.RejectJoinRequest)
 
-	//swagger
+	// chat
+
+	router.Get("/api/v1/chat/messages", ChatHandler.ServeMessages)
+
+	// swagger
 	router.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("/swagger/doc.json"),
 	))
 
-	//server
+	// server
 	httpServer := http.Server{
 		Addr:         cfg.HTTP_Server.Address,
 		Handler:      router,

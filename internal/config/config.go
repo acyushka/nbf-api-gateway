@@ -15,6 +15,7 @@ type GrpcClients struct {
 	UserService        string `yaml:"user_service_address"`
 	MatcherService     string `yaml:"matcher_service_address"`
 	FileStorageService string `yaml:"file_storage_service_address"`
+	ChatService        string `yaml:"chat_service_address"`
 }
 
 type HttpServer struct {
