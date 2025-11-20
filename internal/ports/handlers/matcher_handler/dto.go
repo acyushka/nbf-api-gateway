@@ -48,6 +48,7 @@ type Parameters struct {
 	Sex            string   `json:"sex,omitempty"`
 	UserType       string   `json:"user_type,omitempty"`
 	Description    string   `json:"description,omitempty"`
+	Address        string   `json:"address,omitempty"`
 }
 type ListGroupMembersResponse struct {
 	Forms []*Form `json:"forms"`

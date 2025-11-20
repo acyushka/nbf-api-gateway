@@ -103,6 +103,24 @@ func (c *Client) GetGroup(ctx context.Context, gid string) (*dto.Group, error) {
 	}, nil
 }
 
+func (c *Client) GetGroupByUser(ctx context.Context, uid string) (*dto.Group, error) {
+	resp, err := c.GroupQueryApi.GetGroupByUser(ctx, &matcherv1.GetGroupByUserRequest{
+		UserId: uid,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.Group{
+		Id:         resp.GetId(),
+		OwnerID:    resp.GetOwnerId(),
+		Parameters: ParametersFromProto(resp.GetParameters()),
+		MaxUsers:   resp.GetMaxUsers(),
+		Created_at: resp.GetCreatedAt().AsTime(),
+		Updated_at: resp.GetUpdatedAt().AsTime(),
+	}, nil
+}
+
 func (c *Client) DeleteGroup(ctx context.Context, oid string) error {
 	_, err := c.GroupQueryApi.DeleteGroup(ctx, &matcherv1.DeleteGroupRequest{
 		OwnerId: oid,
@@ -195,7 +213,7 @@ func (c *Client) RejectJoinRequest(ctx context.Context, oid string, rid string) 
 }
 
 func (c *Client) GetRequests(ctx context.Context, groupId string) ([]*dto.GroupRequest, error) {
-	resp, err := c.GroupServiceApi.GetReqeusts(ctx, &matcherv1.GetReqeustsRequest{
+	resp, err := c.GroupServiceApi.GetRequests(ctx, &matcherv1.GetRequestsRequest{
 		GroupId: groupId,
 	})
 	if err != nil {
@@ -237,6 +255,7 @@ func ParametersFromProto(protoParams *matcherv1.Parameters) dto.Parameters {
 		Sex:            sexToString(protoParams.GetSex()),
 		UserType:       userTypeToString(protoParams.GetUserType()),
 		Description:    protoParams.GetDescription(),
+		Address:        protoParams.GetAddress(),
 	}
 }
 

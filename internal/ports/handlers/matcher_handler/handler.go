@@ -22,6 +22,7 @@ type MatcherClient interface {
 	DeleteForm(ctx context.Context, uid string) error
 	//Group Query
 	GetGroup(ctx context.Context, gid string) (*Group, error)
+	GetGroupByUser(ctx context.Context, uid string) (*Group, error)
 	DeleteGroup(ctx context.Context, oid string) error
 	ListGroupMembers(ctx context.Context, gid string) ([]*Form, error)
 	//FindGroup Service
@@ -247,6 +248,36 @@ func (h *MatcherHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("Failed to get Group", zap.Error(err))
 		http.Error(w, "Failed to get Group", http.StatusInternalServerError)
+		return
+	}
+
+	for i, photoID := range group.Parameters.Photos {
+		url, err := h.fileStorageClient.GetPhotoURL(ctx, group.Id, photoID)
+		if err != nil {
+			log.Error("Failed to get presigned URL", zap.Error(err))
+			continue
+		}
+		group.Parameters.Photos[i] = url
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, group)
+}
+
+func (h *MatcherHandler) GetGroupByUser(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	uid := chi.URLParam(r, "uid")
+
+	ctx := r.Context()
+	group, err := h.matcherClient.GetGroupByUser(ctx, uid)
+	if err != nil {
+		log.Error("Failed to get Group by User", zap.Error(err))
+		http.Error(w, "Failed to get Group by User", http.StatusInternalServerError)
 		return
 	}
 
@@ -520,6 +551,7 @@ func toProtoParams(p Parameters, sex, userType int) *matcherv1.Parameters {
 		Sex:            matcherv1.Sex(sex),
 		UserType:       matcherv1.UserType(userType),
 		Description:    p.Description,
+		Address:        p.Address,
 	}
 }
 

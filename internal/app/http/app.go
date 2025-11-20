@@ -130,6 +130,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.Delete("/api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
 
 	router.Get("/api/v1/matcher/group/{gid}", MatcherHandler.GetGroup)
+	router.Get("/api/v1/matcher/group/user/{uid}", MatcherHandler.GetGroupByUser)
 	router.Delete("/api/v1/matcher/group/{oid}", MatcherHandler.DeleteGroup)
 	router.Get("/api/v1/matcher/group/members/{gid}", MatcherHandler.ListGroupMembers)
 
