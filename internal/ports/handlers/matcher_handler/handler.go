@@ -544,6 +544,7 @@ func toProtoParams(p Parameters, sex, userType int) *matcherv1.Parameters {
 		Budget:         p.Budget,
 		RoomCount:      p.RoomCount,
 		RoommatesCount: p.RoommatesCount,
+		Month:          p.Months,
 		Age:            p.Age,
 		Smoking:        p.Smoking,
 		Alko:           p.Alko,
