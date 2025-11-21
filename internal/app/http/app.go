@@ -146,6 +146,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	router.Get("/api/v1/matcher/find/{uid}", MatcherHandler.FindGroups)
 
+	router.Get("/api/v1/matcher/group/{gid}/requests", MatcherHandler.GetRequests)
 	router.Post("/api/v1/matcher/group/send", MatcherHandler.SendJoinRequest)
 	router.Post("/api/v1/matcher/group/accept", MatcherHandler.AcceptJoinRequest)
 	router.Post("/api/v1/matcher/group/reject", MatcherHandler.RejectJoinRequest)

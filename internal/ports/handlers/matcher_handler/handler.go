@@ -28,6 +28,7 @@ type MatcherClient interface {
 	//FindGroup Service
 	FindGroups(ctx context.Context, uid string) ([]*GroupWithScore, error)
 	//Group Service
+	GetRequests(ctx context.Context, gid string) ([]*GroupRequest, error)
 	SendJoinRequest(ctx context.Context, uid string, gid string) (string, error)
 	AcceptJoinRequest(ctx context.Context, oid string, rid string) error
 	RejectJoinRequest(ctx context.Context, oid string, rid string) error
@@ -395,6 +396,27 @@ func (h *MatcherHandler) FindGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 //////////////GROUP SERVICE/////////////////
+
+func (h *MatcherHandler) GetRequests(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	gid := chi.URLParam(r, "gid")
+
+	ctx := r.Context()
+	resp, err := h.matcherClient.GetRequests(ctx, gid)
+	if err != nil {
+		log.Error("Failed to get GroupRequest", zap.Error(err))
+		http.Error(w, "Failed to get GroupRequest", http.StatusInternalServerError)
+		return
+	}
+
+	render.JSON(w, r, resp)
+	render.Status(r, http.StatusOK)
+}
 
 func (h *MatcherHandler) SendJoinRequest(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
