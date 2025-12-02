@@ -56,9 +56,15 @@ func (c *Client) SendMessage(
 	}
 
 	md := make(map[string]string)
-	md["chat_id"] = chatID
-	md["user_id"] = userID
-	md["group_id"] = groupID
+	if chatID != "" {
+		md["chat_id"] = chatID
+	}
+	if userID != "" {
+		md["user_id"] = userID
+	}
+	if groupID != "" {
+		md["group_id"] = groupID
+	}
 	md["uid"] = uid
 
 	ctx = metadata.NewOutgoingContext(ctx, metadata.New(md))
@@ -105,4 +111,37 @@ func (c *Client) SendMessage(
 	}()
 
 	return outputMessageCh, nil
+}
+
+func (c *Client) GetChatList(
+	ctx context.Context,
+	userID string,
+) ([]models.Chat, error) {
+	const op = "chat_client.GetChatList"
+
+	log, err := logger.LoggerFromCtx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("GetChatList", zap.String("user_id", userID))
+
+	resp, err := c.api.GetChatsByUser(ctx, &chatv1.GetChatByUserRequest{
+		UserId: userID,
+	})
+	if err != nil {
+		log.Error("failed to get chat list", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	chats := make([]models.Chat, len(resp.GetChat()))
+	for i, chat := range resp.GetChat() {
+		chats[i] = models.Chat{
+			ID:     chat.GetId(),
+			Name:   chat.GetName(),
+			Avatar: chat.GetAvatar(),
+		}
+	}
+
+	return chats, nil
 }

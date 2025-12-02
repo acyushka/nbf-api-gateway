@@ -21,3 +21,9 @@ type ChatUser struct {
 	Name   string `json:"name"`
 	Avatar string `json:"avatar"`
 }
+
+type Chat struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}

@@ -7,7 +7,9 @@ import (
 
 	"api-gateway/internal/models"
 
+	"github.com/go-chi/render"
 	"github.com/gorilla/websocket"
+	"github.com/hesoyamTM/nbf-auth/pkg/auth"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -15,6 +17,9 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type ChatClient interface {
@@ -25,6 +30,10 @@ type ChatClient interface {
 		groupID string,
 		inputMessageCh <-chan models.InputMessage,
 	) (<-chan models.OutputMessage, error)
+	GetChatList(
+		ctx context.Context,
+		userID string,
+	) ([]models.Chat, error)
 }
 
 type ChatHandler struct {
@@ -37,8 +46,31 @@ func NewChatHandler(chatClient ChatClient) *ChatHandler {
 	}
 }
 
-func (h *ChatHandler) ServeMessages(w http.ResponseWriter, r *http.Request) {
+func (h *ChatHandler) GetChatList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	log, err := logger.LoggerFromCtx(ctx)
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	uid, ok := ctx.Value(auth.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	chats, err := h.chatClient.GetChatList(ctx, uid)
+	if err != nil {
+		log.Error("Failed to get chat list", zap.Error(err))
+		http.Error(w, "Failed to get chat list", http.StatusInternalServerError)
+		return
+	}
+	render.JSON(w, r, chats)
+}
+
+func (h *ChatHandler) ServeMessages(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithCancel(r.Context())
 	log, err := logger.LoggerFromCtx(ctx)
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
@@ -52,12 +84,22 @@ func (h *ChatHandler) ServeMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer conn.Close()
+	defer func() {
+		if err := conn.Close(); err != nil {
+			log.Error("Failed to close connection", zap.Error(err))
+		}
+	}()
 
 	inputMessageCh := make(chan models.InputMessage)
 
 	go func() {
 		defer close(inputMessageCh)
+		defer func() {
+			if err := conn.Close(); err != nil {
+				log.Error("Failed to close connection", zap.Error(err))
+			}
+		}()
+		defer cancel()
 
 		for {
 			var inputMessage models.InputMessage

@@ -99,6 +99,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		"/api/v1/matcher/find":         true,
 		"/api/v1/matcher/group":        true,
 		"/api/v1/chat/messages":        true,
+		"/api/v1/chat/list":            true,
 	}
 
 	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
@@ -154,6 +155,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	// chat
 
 	router.Get("/api/v1/chat/messages", ChatHandler.ServeMessages)
+	router.Get("/api/v1/chat/list", ChatHandler.GetChatList)
 
 	// swagger
 	router.Get("/swagger/*", httpSwagger.Handler(

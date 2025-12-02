@@ -4,7 +4,7 @@ grpc_clients:
   user_service_address: "localhost:60001"
   matcher_service_address: "localhost:60002"
   file_storage_service_address: "localhost:60005"
-  chat_service_address: "localhost:60006"
+  chat_service_address: "localhost:60005"
 http_server:
   address: ":8082"
   timeout: 10s
@@ -23,4 +23,3 @@ cors:
     - "Authorization"
     - "X-Requested-With"
   allow_credentials: true
-
