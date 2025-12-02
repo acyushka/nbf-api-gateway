@@ -2,7 +2,7 @@ module api-gateway
 
 go 1.25.0
 
-require github.com/hesoyamTM/nbf-protos v0.0.0-20251119224543-aa3cc5812be7 // indirectS
+require github.com/hesoyamTM/nbf-protos v0.0.0-20251202193302-f81aa9462370 // indirectS
 
 require (
 	github.com/go-chi/chi v1.5.5

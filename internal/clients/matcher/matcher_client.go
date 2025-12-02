@@ -85,6 +85,23 @@ func (c *Client) DeleteForm(ctx context.Context, uid string) error {
 
 ///////////////////////////////////////////
 
+func (c *Client) LeaveGroup(ctx context.Context, uid string) error {
+	_, err := c.GroupQueryApi.LeaveGroup(ctx, &matcherv1.LeaveGroupRequest{
+		UserId: uid,
+	})
+
+	return err
+}
+
+func (c *Client) KickGroup(ctx context.Context, oid, uid string) error {
+	_, err := c.GroupQueryApi.KickGroup(ctx, &matcherv1.KickGroupRequest{
+		OwnerId: oid,
+		UserId:  uid,
+	})
+
+	return err
+}
+
 func (c *Client) GetGroup(ctx context.Context, gid string) (*dto.Group, error) {
 	resp, err := c.GroupQueryApi.GetGroup(ctx, &matcherv1.GetGroupRequest{
 		GroupId: gid,

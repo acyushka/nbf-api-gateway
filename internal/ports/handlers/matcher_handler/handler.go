@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
+	authorization "github.com/hesoyamTM/nbf-auth/pkg/auth"
 	"github.com/hesoyamTM/nbf-auth/pkg/logger"
 	matcherv1 "github.com/hesoyamTM/nbf-protos/gen/go/matcher"
 	"go.uber.org/zap"
@@ -21,6 +22,8 @@ type MatcherClient interface {
 	UpdateForm(ctx context.Context, uid string, protoParams *matcherv1.Parameters) error
 	DeleteForm(ctx context.Context, uid string) error
 	//Group Query
+	LeaveGroup(ctx context.Context, uid string) error
+	KickGroup(ctx context.Context, oid, uid string) error
 	GetGroup(ctx context.Context, gid string) (*Group, error)
 	GetGroupByUser(ctx context.Context, uid string) (*Group, error)
 	DeleteGroup(ctx context.Context, oid string) error
@@ -234,6 +237,56 @@ func (h *MatcherHandler) DeleteForm(w http.ResponseWriter, r *http.Request) {
 }
 
 //////////////GROUP QUERY/////////////////
+
+func (h *MatcherHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	ctx := r.Context()
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := h.matcherClient.LeaveGroup(ctx, uid); err != nil {
+		log.Error("Failed to leave from group", zap.Error(err))
+		http.Error(w, "Failed to leave from group", http.StatusInternalServerError)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+}
+
+func (h *MatcherHandler) KickGroup(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	oid := chi.URLParam(r, "oid")
+
+	ctx := r.Context()
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err := h.matcherClient.KickGroup(ctx, oid, uid); err != nil {
+		log.Error("Failed to kick group", zap.Error(err))
+		http.Error(w, "Failed to kick group", http.StatusInternalServerError)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+}
 
 func (h *MatcherHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 	log, err := logger.LoggerFromCtx(r.Context())
