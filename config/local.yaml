@@ -1,4 +1,5 @@
 env: "dev"
+domain: "localhost"
 grpc_clients:
   auth_service_address: "localhost:60000"
   user_service_address: "localhost:60001"

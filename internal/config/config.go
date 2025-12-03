@@ -4,6 +4,7 @@ import "time"
 
 type Config struct {
 	Env          string      `yaml:"env" env-default:"dev"`
+	Domain       string      `yaml:"domain"`
 	PublicKey    string      `env:"PUBLIC_KEY" env-required:"true"`
 	GRPC_Clients GrpcClients `yaml:"grpc_clients"`
 	HTTP_Server  HttpServer  `yaml:"http_server"`

@@ -74,7 +74,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	// handlers
 
-	AuthHandler := auth_handler.NewAuthHandler(AuthClient)
+	AuthHandler := auth_handler.NewAuthHandler(AuthClient, cfg.Domain)
 	UserHandler := user_handler.NewUserHandler(UserClient, FileStorageClient)
 	MatcherHandler := matcher_handler.NewMatcherHandler(MatcherClient, FileStorageClient)
 	ChatHandler := chat_handler.NewChatHandler(ChatClient)

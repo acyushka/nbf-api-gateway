@@ -25,93 +25,15 @@ type AuthClient interface {
 
 type AuthHandler struct {
 	authClient AuthClient
+	domain     string
 }
 
-func NewAuthHandler(authClient AuthClient) *AuthHandler {
+func NewAuthHandler(authClient AuthClient, domain string) *AuthHandler {
 	return &AuthHandler{
 		authClient: authClient,
+		domain:     domain,
 	}
 }
-
-/*
-	func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-		log, err := logger.LoggerFromCtx(r.Context())
-		if err != nil {
-			http.Error(w, "Internal error", http.StatusInternalServerError)
-
-			return
-		}
-
-		var req RegisterRequest
-
-		if err := render.DecodeJSON(r.Body, &req); err != nil {
-			//log
-
-			http.Error(w, "Invalid JSON", http.StatusBadRequest)
-			return
-		}
-
-		ctx := r.Context()
-
-		token, err := h.authClient.Register(ctx, req.PhoneNumber, req.Name, req.Surname)
-		if err != nil {
-			//log
-
-			http.Error(w, "Authorization error", http.StatusUnauthorized)
-		}
-
-		http.SetCookie(w, &http.Cookie{
-			Name:     "access_token",
-			Value:    token,
-			HttpOnly: true,
-			Domain:   "localhost",
-			Path:     "/",
-		})
-
-		render.Status(r, http.StatusOK)
-	}
-
-	func (c *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-		log, err := logger.LoggerFromCtx(r.Context())
-		if err != nil {
-			http.Error(w, "Internal error", http.StatusInternalServerError)
-
-			return
-		}
-
-		var req LoginRequest
-
-		if err := render.DecodeJSON(r.Body, &req); err != nil {
-			//log
-
-			http.Error(w, "Invalid JSON", http.StatusBadRequest)
-
-			return
-		}
-
-		ctx := r.Context()
-
-		token, err := c.authClient.Login(ctx, req.PhoneNumber)
-		if err != nil {
-			//log
-
-			http.Error(w, "Authorization error", http.StatusUnauthorized)
-
-			return
-		}
-
-		http.SetCookie(w, &http.Cookie{
-			Name:     "access_token",
-			Value:    token,
-			HttpOnly: true,
-			Domain:   "localhost",
-			Path:     "/",
-		})
-
-		render.Status(r, http.StatusOK)
-
-}
-*/
 
 // @Summary Logout
 // @Description Logout user
@@ -161,7 +83,7 @@ func (c *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		Name:     "access_token",
 		Value:    "",
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 	})
@@ -169,19 +91,13 @@ func (c *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		Name:     "refresh_token",
 		Value:    "",
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 	})
 
 	render.Status(r, http.StatusOK)
 }
-
-/*
-func (c *AuthHandler) VerifyPhoneNumber(w http.ResponseWriter, r *http.Request) {
-
-}
-*/
 
 // @Summary Refresh tokens
 // @Description Обновляет access и refresh токены
@@ -232,7 +148,7 @@ func (c *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		Name:     "access_token",
 		Value:    resp.AccessToken,
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  resp.Access_expire_at,
 	})
@@ -240,7 +156,7 @@ func (c *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		Name:     "refresh_token",
 		Value:    resp.RefreshToken,
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  resp.Refresh_expire_at,
 	})
@@ -319,7 +235,7 @@ func (c *AuthHandler) YandexAuthorize(w http.ResponseWriter, r *http.Request) {
 		Name:     "access_token",
 		Value:    resp.AccessToken,
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  resp.Access_expire_at,
 	})
@@ -327,7 +243,7 @@ func (c *AuthHandler) YandexAuthorize(w http.ResponseWriter, r *http.Request) {
 		Name:     "refresh_token",
 		Value:    resp.RefreshToken,
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  resp.Refresh_expire_at,
 	})
@@ -407,7 +323,7 @@ func (c *AuthHandler) GoogleAuthorize(w http.ResponseWriter, r *http.Request) {
 		Name:     "access_token",
 		Value:    resp.AccessToken,
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  resp.Access_expire_at,
 	})
@@ -415,7 +331,7 @@ func (c *AuthHandler) GoogleAuthorize(w http.ResponseWriter, r *http.Request) {
 		Name:     "refresh_token",
 		Value:    resp.RefreshToken,
 		HttpOnly: true,
-		Domain:   "localhost",
+		Domain:   c.domain,
 		Path:     "/",
 		Expires:  resp.Refresh_expire_at,
 	})
