@@ -269,11 +269,11 @@ func (h *MatcherHandler) KickGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oid := chi.URLParam(r, "oid")
+	uid := chi.URLParam(r, "uid")
 
 	ctx := r.Context()
-	uid, ok := ctx.Value(authorization.UID).(string)
-	if !ok || uid == "" {
+	oid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || oid == "" {
 		log.Error("uid not found in context")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
