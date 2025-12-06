@@ -71,6 +71,9 @@ func (h *ChatHandler) GetChatList(w http.ResponseWriter, r *http.Request) {
 
 func (h *ChatHandler) ServeMessages(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(r.Context())
+
+	defer cancel()
+
 	log, err := logger.LoggerFromCtx(ctx)
 	if err != nil {
 		http.Error(w, "Internal error", http.StatusInternalServerError)
@@ -94,11 +97,6 @@ func (h *ChatHandler) ServeMessages(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer close(inputMessageCh)
-		defer func() {
-			if err := conn.Close(); err != nil {
-				log.Error("Failed to close connection", zap.Error(err))
-			}
-		}()
 		defer cancel()
 
 		for {
@@ -127,7 +125,10 @@ func (h *ChatHandler) ServeMessages(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		select {
-		case outputMessage := <-outputMessageCh:
+		case outputMessage, ok := <-outputMessageCh:
+			if !ok {
+				return
+			}
 			if err := conn.WriteJSON(outputMessage); err != nil {
 				log.Error("Failed to write message", zap.Error(err))
 				return

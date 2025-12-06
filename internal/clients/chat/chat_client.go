@@ -136,10 +136,20 @@ func (c *Client) GetChatList(
 
 	chats := make([]models.Chat, len(resp.GetChat()))
 	for i, chat := range resp.GetChat() {
+		members := make([]models.ChatUser, len(chat.GetMembers()))
+		for j, member := range chat.GetMembers() {
+			members[j] = models.ChatUser{
+				ID:     member.GetId(),
+				Name:   member.GetName(),
+				Avatar: member.GetAvatar(),
+			}
+		}
+
 		chats[i] = models.Chat{
-			ID:     chat.GetId(),
-			Name:   chat.GetName(),
-			Avatar: chat.GetAvatar(),
+			ID:      chat.GetId(),
+			Name:    chat.GetName(),
+			Avatar:  chat.GetAvatar(),
+			Members: members,
 		}
 	}
 

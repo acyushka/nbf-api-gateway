@@ -23,7 +23,8 @@ type ChatUser struct {
 }
 
 type Chat struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Avatar string `json:"avatar"`
+	ID      string     `json:"id"`
+	Name    string     `json:"name"`
+	Avatar  string     `json:"avatar"`
+	Members []ChatUser `json:"members"`
 }
