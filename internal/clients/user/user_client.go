@@ -64,6 +64,7 @@ func (c *Client) GetUser(ctx context.Context, uid string) (*models.User, error) 
 		Name:        resp.User.GetName(),
 		Surname:     resp.User.GetSurname(),
 		Contacts:    resp.User.GetContacts(),
+		Avatar:      resp.User.GetAvatar(),
 		Description: resp.User.GetDescription(),
 	}, nil
 }
@@ -83,6 +84,7 @@ func (c *Client) GetUsers(ctx context.Context, uids []string) ([]*models.User, e
 			Name:        user.GetName(),
 			Surname:     user.GetSurname(),
 			Contacts:    user.GetContacts(),
+			Avatar:      user.GetAvatar(),
 			Description: user.GetDescription(),
 		}
 	}
