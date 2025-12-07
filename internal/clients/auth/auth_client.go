@@ -1,8 +1,9 @@
 package auth
 
 import (
-	handler "api-gateway/internal/ports/handlers/auth_handler"
 	"context"
+
+	handler "api-gateway/internal/ports/handlers/auth_handler"
 
 	authInt "github.com/hesoyamTM/nbf-auth/pkg/auth"
 	authv1 "github.com/hesoyamTM/nbf-protos/gen/go/auth"
@@ -134,4 +135,15 @@ func (c *Client) GoogleAuthorize(ctx context.Context, state, code string) (*hand
 		Access_expire_at:  resp.GetAccessExpireAt().AsTime(),
 		Refresh_expire_at: resp.GetRefreshExpireAt().AsTime(),
 	}, nil
+}
+
+func (c *Client) IsUserBlocked(ctx context.Context, uid string) (bool, error) {
+	resp, err := c.api.IsUserBlocked(ctx, &authv1.IsUserBlockedRequest{
+		UserId: uid,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return resp.GetBlocked(), nil
 }

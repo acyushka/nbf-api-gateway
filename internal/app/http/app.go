@@ -86,78 +86,61 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		panic(err)
 	}
 
-	authMethods := map[string]bool{
-		"/api/v1/auth/google/login":    false,
-		"/api/v1/auth/google/callback": false,
-		"/api/v1/auth/yandex/login":    false,
-		"/api/v1/auth/yandex/callback": false,
-		"/api/v1/auth/logout":          true,
-		"/api/v1/auth/refresh":         false,
-		"/api/v1/user/session":         true,
-		"/api/v1/user":                 true,
-		"/api/v1/matcher/form":         true,
-		"/api/v1/matcher/find":         true,
-		"/api/v1/matcher/group":        true,
-		"/api/v1/chat/messages":        true,
-		"/api/v1/chat/list":            true,
-	}
-
 	pubKey, err := decodeKeys.DecodePublicKey(cfg.PublicKey)
 	if err != nil {
 		panic(err)
 	}
 
-	authMiddleware := authMid.NewAuthMiddleware("access_token", authMethods, pubKey)
+	authMiddleware := authMid.NewAuthMiddleware("access_token", AuthClient, pubKey)
 
 	router.Use(middlewares.Cors(cfg))
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 	router.Use(loggingMiddleware)
-	router.Use(authMiddleware)
 
 	// auth
 	router.Get("/api/v1/auth/google/login", AuthHandler.GoogleLoginURL)
 	router.Get("/api/v1/auth/google/callback", AuthHandler.GoogleAuthorize)
 	router.Get("/api/v1/auth/yandex/login", AuthHandler.YandexLoginURL)
 	router.Get("/api/v1/auth/yandex/callback", AuthHandler.YandexAuthorize)
-	router.Delete("/api/v1/auth/logout", AuthHandler.Logout)
 	router.Head("/api/v1/auth/refresh", AuthHandler.RefreshToken)
+	router.With(authMiddleware).Delete("/api/v1/auth/logout", AuthHandler.Logout)
 
 	// user
 
-	router.Get("/api/v1/user/session", UserHandler.GetSession)
 	router.Post("/api/v1/user", UserHandler.CreateUser)
 	router.Get("/api/v1/user/{uid}", UserHandler.GetUser)
 	router.Get("/api/v1/users", UserHandler.GetUsers)
-	router.Put("/api/v1/user", UserHandler.UpdateUser)
-	router.Delete("/api/v1/user", UserHandler.DeleteUser)
+	router.With(authMiddleware).Get("/api/v1/user/session", UserHandler.GetSession)
+	router.With(authMiddleware).Put("/api/v1/user", UserHandler.UpdateUser)
+	router.With(authMiddleware).Delete("/api/v1/user", UserHandler.DeleteUser)
 
 	// matcher
 
-	router.Post("/api/v1/matcher/form", MatcherHandler.CreateForm)
 	router.Get("/api/v1/matcher/form/{uid}", MatcherHandler.GetFormByUser)
-	router.Put("/api/v1/matcher/form", MatcherHandler.UpdateForm)
-	router.Delete("/api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
+	router.With(authMiddleware).Post("/api/v1/matcher/form", MatcherHandler.CreateForm)
+	router.With(authMiddleware).Put("/api/v1/matcher/form", MatcherHandler.UpdateForm)
+	router.With(authMiddleware).Delete("/api/v1/matcher/form/{uid}", MatcherHandler.DeleteForm)
 
 	router.Get("/api/v1/matcher/group/{gid}", MatcherHandler.GetGroup)
 	router.Get("/api/v1/matcher/group/user/{uid}", MatcherHandler.GetGroupByUser)
-	router.Delete("/api/v1/matcher/group/{oid}", MatcherHandler.DeleteGroup)
-	router.Delete("/api/v1/matcher/group/user", MatcherHandler.LeaveGroup)
-	router.Delete("/api/v1/matcher/group/kick/{uid}", MatcherHandler.KickGroup)
 	router.Get("/api/v1/matcher/group/members/{gid}", MatcherHandler.ListGroupMembers)
+	router.With(authMiddleware).Delete("/api/v1/matcher/group/{oid}", MatcherHandler.DeleteGroup)
+	router.With(authMiddleware).Delete("/api/v1/matcher/group/user", MatcherHandler.LeaveGroup)
+	router.With(authMiddleware).Delete("/api/v1/matcher/group/kick/{uid}", MatcherHandler.KickGroup)
 
-	router.Get("/api/v1/matcher/find/{uid}", MatcherHandler.FindGroups)
+	router.With(authMiddleware).Get("/api/v1/matcher/find/{uid}", MatcherHandler.FindGroups)
 
 	router.Get("/api/v1/matcher/group/{gid}/requests", MatcherHandler.GetRequests)
-	router.Post("/api/v1/matcher/group/send", MatcherHandler.SendJoinRequest)
-	router.Post("/api/v1/matcher/group/accept", MatcherHandler.AcceptJoinRequest)
-	router.Post("/api/v1/matcher/group/reject", MatcherHandler.RejectJoinRequest)
+	router.With(authMiddleware).Post("/api/v1/matcher/group/send", MatcherHandler.SendJoinRequest)
+	router.With(authMiddleware).Post("/api/v1/matcher/group/accept", MatcherHandler.AcceptJoinRequest)
+	router.With(authMiddleware).Post("/api/v1/matcher/group/reject", MatcherHandler.RejectJoinRequest)
 
 	// chat
 
-	router.Get("/api/v1/chat/messages", ChatHandler.ServeMessages)
-	router.Get("/api/v1/chat/list", ChatHandler.GetChatList)
+	router.With(authMiddleware).Get("/api/v1/chat/messages", ChatHandler.ServeMessages)
+	router.With(authMiddleware).Get("/api/v1/chat/list", ChatHandler.GetChatList)
 
 	// swagger
 	router.Get("/swagger/*", httpSwagger.Handler(

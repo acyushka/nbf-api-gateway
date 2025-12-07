@@ -2,19 +2,19 @@ module api-gateway
 
 go 1.25.0
 
-require github.com/hesoyamTM/nbf-protos v0.0.0-20251206141328-32b670cc7c91 // indirectS
+require github.com/hesoyamTM/nbf-protos v0.0.0-20251206181518-6e23fd884701 // indirectS
 
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/render v1.0.3
-	github.com/hesoyamTM/nbf-auth v0.0.0-20251114161533-0328e0ea717a
+	github.com/hesoyamTM/nbf-auth v0.0.0-20251206234627-0c8a9cc0deda
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.6
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.77.0
 )
 
-require github.com/gorilla/websocket v1.5.3 // indirect
+require github.com/gorilla/websocket v1.5.3
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
