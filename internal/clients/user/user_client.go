@@ -100,6 +100,7 @@ func (c *Client) UpdateUser(ctx context.Context, user *models.User) error {
 			Name:        user.Name,
 			Surname:     user.Surname,
 			Contacts:    user.Contacts,
+			Avatar:      user.Avatar,
 			Description: user.Description,
 		},
 	})
