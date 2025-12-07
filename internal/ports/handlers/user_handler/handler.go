@@ -273,14 +273,20 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		defer file.Close()
 
+		log.Info("Uploading avatar",
+			zap.String("user_id", uid),
+			zap.String("filename", metadata.Filename),
+			zap.Int64("file_size", metadata.Size),
+			zap.String("content_type", metadata.Header.Get("Content-Type")))
+
 		avatar, err = h.fileStorageClient.UploadAvatar(ctx, uid, &FilePhoto{
 			Data:        file,
 			FileName:    metadata.Filename,
 			ContentType: metadata.Header.Get("Content-Type"),
 		})
 		if err != nil {
-			log.Error("Failed to upload avatar", zap.Error(err))
-			http.Error(w, "Failed to upload avatar", http.StatusInternalServerError)
+			log.Error("Failed to upload avatar", zap.Error(err), zap.String("grpc_error", err.Error()))
+			http.Error(w, "Failed to upload avatar: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
