@@ -75,7 +75,7 @@ func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Error("Failed to get presigned url", zap.Error(err))
 			http.Error(w, "Photo is not founded", http.StatusNotFound)
-			return
+			url = ""
 		}
 		user.Avatar = url
 	}
@@ -165,7 +165,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Error("Failed to get presigned url", zap.Error(err))
 			http.Error(w, "Photo is not founded", http.StatusNotFound)
-			return
+			url = ""
 		}
 		user.Avatar = url
 	}
@@ -220,7 +220,7 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Error("Failed to get presigned url", zap.Error(err))
 				http.Error(w, "Photo is not founded", http.StatusNotFound)
-				return
+				url = ""
 			}
 
 			user.Avatar = url
