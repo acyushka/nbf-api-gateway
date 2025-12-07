@@ -74,7 +74,6 @@ func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 		url, err := c.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
 		if err != nil {
 			log.Error("Failed to get presigned url", zap.Error(err))
-			http.Error(w, "Photo is not founded", http.StatusNotFound)
 			url = ""
 		}
 		user.Avatar = url
@@ -164,7 +163,6 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		url, err := h.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
 		if err != nil {
 			log.Error("Failed to get presigned url", zap.Error(err))
-			http.Error(w, "Photo is not founded", http.StatusNotFound)
 			url = ""
 		}
 		user.Avatar = url
@@ -219,7 +217,6 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 			url, err := h.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
 			if err != nil {
 				log.Error("Failed to get presigned url", zap.Error(err))
-				http.Error(w, "Photo is not founded", http.StatusNotFound)
 				url = ""
 			}
 
