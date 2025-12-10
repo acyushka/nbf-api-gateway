@@ -70,14 +70,14 @@ func (c *UserHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Avatar != "" {
-		url, err := c.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
-		if err != nil {
-			log.Error("Failed to get presigned url", zap.Error(err))
-			url = ""
-		}
-		user.Avatar = url
-	}
+	// if user.Avatar != "" {
+	// 	url, err := c.fileStorageClient.GetPhotoURL(ctx, user.ID, user.Avatar)
+	// 	if err != nil {
+	// 		log.Error("Failed to get presigned url", zap.Error(err))
+	// 		url = ""
+	// 	}
+	// 	user.Avatar = url
+	// }
 
 	render.JSON(w, r, user)
 }
