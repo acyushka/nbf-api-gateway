@@ -2,24 +2,26 @@ module api-gateway
 
 go 1.25.0
 
-require github.com/hesoyamTM/nbf-protos v0.0.0-20251206181518-6e23fd884701 // indirectS
+require github.com/hesoyamTM/nbf-protos v0.0.0-20251209182355-a1d9276ced0e // indirectS
 
 require (
 	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/render v1.0.3
-	github.com/hesoyamTM/nbf-auth v0.0.0-20251206234627-0c8a9cc0deda
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.16.6
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.77.0
 )
 
-require github.com/gorilla/websocket v1.5.3
+require (
+	github.com/acyushka/nbf-file-storage-service v0.0.2
+	github.com/gorilla/websocket v1.5.3
+	github.com/hesoyamTM/nbf-auth v0.0.0-20251206234627-0c8a9cc0deda
+)
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
-	github.com/acyushka/nbf-file-storage-service v0.0.2
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/go-openapi/jsonpointer v0.22.1 // indirect
 	github.com/go-openapi/jsonreference v0.21.2 // indirect

@@ -52,8 +52,8 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/hesoyamTM/nbf-auth v0.0.0-20251206234627-0c8a9cc0deda h1:/ER7/fO9jkiLxrG7uwZ8h8JVDsj5H5AXgUqT/99sifE=
 github.com/hesoyamTM/nbf-auth v0.0.0-20251206234627-0c8a9cc0deda/go.mod h1:BmtWbaEpazeq3CtDPOcqZsWk4ciIqwY2sU8oIisaems=
-github.com/hesoyamTM/nbf-protos v0.0.0-20251206181518-6e23fd884701 h1:EZb2QdLYC0EHt9VXfIsAkzo76/oFaaw+/xjYQkvIZf4=
-github.com/hesoyamTM/nbf-protos v0.0.0-20251206181518-6e23fd884701/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
+github.com/hesoyamTM/nbf-protos v0.0.0-20251209182355-a1d9276ced0e h1:GREsbVof1M29Xs6AE7iaRsJYxExn5Kh8D/h+yH2CMm4=
+github.com/hesoyamTM/nbf-protos v0.0.0-20251209182355-a1d9276ced0e/go.mod h1:ixfBCPF4UQu+DRdmVsHZlvS2w9aiTy5r2neAw+oxHUg=
 github.com/ilyakaznacheev/cleanenv v1.5.0 h1:0VNZXggJE2OYdXE87bfSSwGxeiGt9moSR2lOrsHHvr4=
 github.com/ilyakaznacheev/cleanenv v1.5.0/go.mod h1:a5aDzaJrLCQZsazHol1w8InnDcOX0OColm64SlIi6gk=
 github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=

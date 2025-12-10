@@ -12,11 +12,12 @@ type Config struct {
 }
 
 type GrpcClients struct {
-	AuthService        string `yaml:"auth_service_address"`
-	UserService        string `yaml:"user_service_address"`
-	MatcherService     string `yaml:"matcher_service_address"`
-	FileStorageService string `yaml:"file_storage_service_address"`
-	ChatService        string `yaml:"chat_service_address"`
+	AuthService         string `yaml:"auth_service_address"`
+	UserService         string `yaml:"user_service_address"`
+	MatcherService      string `yaml:"matcher_service_address"`
+	FileStorageService  string `yaml:"file_storage_service_address"`
+	ChatService         string `yaml:"chat_service_address"`
+	NotificationService string `yaml:"notification_service_address"`
 }
 
 type HttpServer struct {

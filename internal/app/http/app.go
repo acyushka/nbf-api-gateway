@@ -7,12 +7,14 @@ import (
 	"api-gateway/internal/clients/auth"
 	"api-gateway/internal/clients/chat"
 	"api-gateway/internal/clients/matcher"
+	"api-gateway/internal/clients/notification"
 	s3 "api-gateway/internal/clients/storage"
 	"api-gateway/internal/clients/user"
 	"api-gateway/internal/config"
 	"api-gateway/internal/ports/handlers/auth_handler"
 	"api-gateway/internal/ports/handlers/chat_handler"
 	"api-gateway/internal/ports/handlers/matcher_handler"
+	"api-gateway/internal/ports/handlers/notification_handler"
 	"api-gateway/internal/ports/handlers/user_handler"
 	"api-gateway/internal/ports/middlewares"
 
@@ -31,11 +33,12 @@ type App struct {
 }
 
 type Clients struct {
-	AuthService_Addr        string
-	UserService_Addr        string
-	MatcherService_Addr     string
-	FileStorageService_Addr string
-	ChatService_Addr        string
+	AuthService_Addr         string
+	UserService_Addr         string
+	MatcherService_Addr      string
+	FileStorageService_Addr  string
+	ChatService_Addr         string
+	NotificationService_Addr string
 }
 
 func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
@@ -72,12 +75,18 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		log.Error("failed to connect chat client", zap.Error(err))
 	}
 
+	NotificationClient, err := notification.New(ctx, clients.NotificationService_Addr)
+	if err != nil {
+		log.Error("failed to connect notification client", zap.Error(err))
+	}
+
 	// handlers
 
 	AuthHandler := auth_handler.NewAuthHandler(AuthClient, cfg.Domain)
 	UserHandler := user_handler.NewUserHandler(UserClient, FileStorageClient)
 	MatcherHandler := matcher_handler.NewMatcherHandler(MatcherClient, FileStorageClient)
 	ChatHandler := chat_handler.NewChatHandler(ChatClient)
+	NotificationHandler := notification_handler.NewNotificationHandler(NotificationClient)
 
 	// middlewares
 
@@ -141,6 +150,12 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	router.With(authMiddleware).Get("/api/v1/chat/messages", ChatHandler.ServeMessages)
 	router.With(authMiddleware).Get("/api/v1/chat/list", ChatHandler.GetChatList)
+
+	// notification
+
+	router.With(authMiddleware).Get("/api/v1/notifications", NotificationHandler.GetNotifications)
+	router.With(authMiddleware).Get("/api/v1/notifications/read", NotificationHandler.ReadNotification)
+	router.With(authMiddleware).Get("/api/v1/notifications/stream", NotificationHandler.GettingNotifications)
 
 	// swagger
 	router.Get("/swagger/*", httpSwagger.Handler(

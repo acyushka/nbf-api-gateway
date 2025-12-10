@@ -35,11 +35,12 @@ func main() {
 	log.Debug("Logger is working")
 
 	Clients := httpapp.Clients{
-		AuthService_Addr:        cfg.GRPC_Clients.AuthService,
-		UserService_Addr:        cfg.GRPC_Clients.UserService,
-		MatcherService_Addr:     cfg.GRPC_Clients.MatcherService,
-		FileStorageService_Addr: cfg.GRPC_Clients.FileStorageService,
-		ChatService_Addr:        cfg.GRPC_Clients.ChatService,
+		AuthService_Addr:         cfg.GRPC_Clients.AuthService,
+		UserService_Addr:         cfg.GRPC_Clients.UserService,
+		MatcherService_Addr:      cfg.GRPC_Clients.MatcherService,
+		FileStorageService_Addr:  cfg.GRPC_Clients.FileStorageService,
+		ChatService_Addr:         cfg.GRPC_Clients.ChatService,
+		NotificationService_Addr: cfg.GRPC_Clients.NotificationService,
 	}
 
 	application := app.NewApp(ctx, cfg, Clients)
