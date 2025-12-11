@@ -155,3 +155,57 @@ func (c *Client) GetChatList(
 
 	return chats, nil
 }
+
+func (c *Client) GetMessageEvents(
+	ctx context.Context,
+	userID string,
+) (<-chan models.OutputMessage, error) {
+	const op = "chat_client.GetMessageEvents"
+
+	log, err := logger.LoggerFromCtx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("GetMessageEvents", zap.String("user_id", userID))
+
+	stream, err := c.api.GetMessageEvents(
+		ctx,
+		&chatv1.GetMessageEventsRequest{
+			UserId: userID,
+		},
+	)
+	if err != nil {
+		log.Error("failed to get message events", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	messageCh := make(chan models.OutputMessage)
+
+	go func() {
+		defer stream.CloseSend()
+		defer close(messageCh)
+
+		for {
+			resp, err := stream.Recv()
+			if err != nil {
+				log.Error("failed to receive message from stream", zap.Error(err))
+				return
+			}
+
+			messageCh <- models.OutputMessage{
+				ChatID: resp.GetChatId(),
+				Sender: models.ChatUser{
+					ID:     resp.GetUser().GetId(),
+					Name:   resp.GetUser().GetName(),
+					Avatar: resp.GetUser().GetAvatar(),
+				},
+				Content:     resp.GetText(),
+				ContentType: "text", // TODO: add content type
+				CreatedAt:   resp.GetCreatedAt().AsTime(),
+			}
+		}
+	}()
+
+	return messageCh, nil
+}

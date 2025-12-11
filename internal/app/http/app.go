@@ -150,11 +150,12 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 
 	router.With(authMiddleware).Get("/api/v1/chat/messages", ChatHandler.ServeMessages)
 	router.With(authMiddleware).Get("/api/v1/chat/list", ChatHandler.GetChatList)
+	router.With(authMiddleware).Get("/api/v1/chat/messages/stream", ChatHandler.GetMessageEvents)
 
 	// notification
 
 	router.With(authMiddleware).Get("/api/v1/notifications", NotificationHandler.GetNotifications)
-	router.With(authMiddleware).Get("/api/v1/notifications/read", NotificationHandler.ReadNotification)
+	router.With(authMiddleware).Put("/api/v1/notifications/read", NotificationHandler.ReadNotification)
 	router.With(authMiddleware).Get("/api/v1/notifications/stream", NotificationHandler.GettingNotifications)
 
 	// swagger
@@ -167,7 +168,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 		Addr:         cfg.HTTP_Server.Address,
 		Handler:      router,
 		ReadTimeout:  cfg.HTTP_Server.Timeout,
-		WriteTimeout: cfg.HTTP_Server.Timeout,
+		WriteTimeout: 0,
 		IdleTimeout:  cfg.HTTP_Server.Idle_Timeout,
 	}
 
