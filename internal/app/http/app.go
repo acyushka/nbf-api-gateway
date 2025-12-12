@@ -142,6 +142,7 @@ func New(ctx context.Context, cfg *config.Config, clients Clients) *App {
 	router.With(authMiddleware).Get("/api/v1/matcher/find/{uid}", MatcherHandler.FindGroups)
 
 	router.Get("/api/v1/matcher/group/{gid}/requests", MatcherHandler.GetRequests)
+	router.With(authMiddleware).Get("/api/v1/matcher/group/requests", MatcherHandler.GetRequests)
 	router.With(authMiddleware).Post("/api/v1/matcher/group/send", MatcherHandler.SendJoinRequest)
 	router.With(authMiddleware).Post("/api/v1/matcher/group/accept", MatcherHandler.AcceptJoinRequest)
 	router.With(authMiddleware).Post("/api/v1/matcher/group/reject", MatcherHandler.RejectJoinRequest)

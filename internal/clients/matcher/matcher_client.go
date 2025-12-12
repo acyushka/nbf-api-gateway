@@ -249,6 +249,26 @@ func (c *Client) GetRequests(ctx context.Context, groupId string) ([]*dto.GroupR
 	return requests, nil
 }
 
+func (c *Client) GetRequestsByUserId(ctx context.Context, userId string) ([]*dto.GroupRequest, error) {
+	resp, err := c.GroupServiceApi.GetRequestsByUserId(ctx, &matcherv1.GetRequestsByUserIdRequest{
+		UserId: userId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	requests := make([]*dto.GroupRequest, len(resp.GetRequests()))
+	for i, request := range resp.GetRequests() {
+		requests[i] = &dto.GroupRequest{
+			ID:        request.GetId(),
+			GroupID:   request.GetGroupId(),
+			UserID:    request.GetUserId(),
+			CreatedAt: request.GetCreatedAt().AsTime(),
+		}
+	}
+	return requests, nil
+}
+
 // Внутрянка
 
 func ParametersFromProto(protoParams *matcherv1.Parameters) dto.Parameters {

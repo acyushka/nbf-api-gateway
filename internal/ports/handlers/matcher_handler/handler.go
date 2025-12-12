@@ -32,6 +32,7 @@ type MatcherClient interface {
 	FindGroups(ctx context.Context, uid string) ([]*GroupWithScore, error)
 	//Group Service
 	GetRequests(ctx context.Context, gid string) ([]*GroupRequest, error)
+	GetRequestsByUserId(ctx context.Context, uid string) ([]*GroupRequest, error)
 	SendJoinRequest(ctx context.Context, uid string, gid string) (string, error)
 	AcceptJoinRequest(ctx context.Context, oid string, rid string) error
 	RejectJoinRequest(ctx context.Context, oid string, rid string) error
@@ -464,6 +465,32 @@ func (h *MatcherHandler) GetRequests(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Error("Failed to get GroupRequest", zap.Error(err))
 		http.Error(w, "Failed to get GroupRequest", http.StatusInternalServerError)
+		return
+	}
+
+	render.JSON(w, r, resp)
+	render.Status(r, http.StatusOK)
+}
+
+func (h *MatcherHandler) GetRequestsByUserId(w http.ResponseWriter, r *http.Request) {
+	log, err := logger.LoggerFromCtx(r.Context())
+	if err != nil {
+		http.Error(w, "Internal error", http.StatusInternalServerError)
+		return
+	}
+
+	ctx := r.Context()
+	uid, ok := ctx.Value(authorization.UID).(string)
+	if !ok || uid == "" {
+		log.Error("uid not found in context")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	resp, err := h.matcherClient.GetRequestsByUserId(ctx, uid)
+	if err != nil {
+		log.Error("Failed to get GroupRequest by user id", zap.Error(err))
+		http.Error(w, "Failed to get GroupRequest by user id", http.StatusInternalServerError)
 		return
 	}
 
